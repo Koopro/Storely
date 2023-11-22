@@ -37,5 +37,3 @@ Storely is a modular, customizable management system designed to meet the specif
 
 ## Contact
 - Information for users to reach out with questions, feedback, or contributions.
-
-_This README is a brief overview of the Storely project. For more detailed information, please refer to the project documentation._
