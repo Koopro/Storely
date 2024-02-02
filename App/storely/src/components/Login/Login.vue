@@ -75,8 +75,9 @@ export default {
       ],
       passwordRules: [
         v => !!v || 'Password is required',
-        v => v.length >= 6 || 'Password must be at least 6 characters'
-      ],
+        v => v.length >= 6 || 'Password must be at least 6 characters',
+        v => /.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-].*/.test(v) || 'Password must contain at least one special character',
+        v => /\d/.test(v) || 'Password must contain at least one digit'      ],
     };
   },
   methods: {
