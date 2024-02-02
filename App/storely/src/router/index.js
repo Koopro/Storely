@@ -14,13 +14,13 @@ const routes = [
     path: '/home',
     name: 'home',
     component: HomeView,
-    meta: { requiresAuth: true } // Add a meta field to indicate authentication is required
+    meta: { requiresAuth: false } // Add a meta field to indicate authentication is required
   },
   {
     path: '/profile',
     name: 'profile',
     component: ProfileView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: false }
   },
   {
     path: '/testing',
