@@ -93,7 +93,7 @@
                 block
                 large
                 type="link"
-                href="../Login/Login.vue"
+                href="../"
               >
                 Login
               </v-btn>
@@ -156,7 +156,7 @@ export default {
 };
 </script>
 
-<style scoped>
+/*<style scoped>
 /* Card styling */
 .rounded-card {
   border-radius: 25px; /* Card border radius */
@@ -184,3 +184,4 @@ export default {
 
 /* Additional styles or overrides can be added here */
 </style>
+*/

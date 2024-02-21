@@ -50,7 +50,7 @@
                 block
                 large
                 type="link"
-                href="../../views/Register.vue"
+                href="/register"
               >
                 Register
               </v-btn>
