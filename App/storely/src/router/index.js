@@ -3,7 +3,6 @@ import HomeView from '../views/HomeView.vue';
 import ProfileView from '../views/ProfileView.vue';
 import LoginView from '../views/LoginView.vue';
 import TestView from '../views/TestView.vue';
-import RegisterView from '../views/RegisterView.vue';
 
 const routes = [
   {
@@ -28,11 +27,7 @@ const routes = [
     name: 'testing',
     component: TestView,
   },
-  {
-    path: '/register',
-    name: 'register',
-    component: RegisterView
-  }
+
 ];
 
 const router = createRouter({
