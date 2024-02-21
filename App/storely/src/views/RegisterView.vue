@@ -1,23 +1,43 @@
 <template>
-  <v-container class="login-container" fluid>
+  <v-container class="register-container" fluid>
     <v-row align="center" justify="center" class="fill-height">
       <v-col cols="12" sm="8" md="6" lg="4">
         <v-card class="rounded-card pa-5" :class="{ 'dark-mode': darkMode }">
-          <v-card-title class="text-h5 text-center mb-4">Login</v-card-title>
+          <v-card-title class="text-h5 text-center mb-4">Register</v-card-title>
           <v-card-text>
             <v-form ref="form" class="mx-3" @submit.prevent="submitForm">
               <v-text-field
-                label="Email Address"
-                v-model="email"
-                :rules="emailRules"
+                label="First Name"
+                v-model="firstName"
+                :rules="nameRules"
                 variant="outlined"
                 dense
                 clearable
                 class="rounded-input mb-3"
-                aria-describedby="email-description"
+                aria-describedby="firstname-description"
               ></v-text-field>
               <v-text-field
-                label="Password"
+                label="Last Name"
+                v-model="lastName"
+                :rules="nameRules"
+                variant="outlined"
+                dense
+                clearable
+                class="rounded-input mb-3"
+                aria-describedby="lastname-description"
+              ></v-text-field>
+              <v-text-field
+                label="Username"
+                v-model="username"
+                :rules="usernameRules"
+                variant="outlined"
+                dense
+                clearable
+                class="rounded-input mb-3"
+                aria-describedby="username-description"
+              ></v-text-field>
+              <v-text-field
+                label="Create Password"
                 v-model="password"
                 :rules="passwordRules"
                 :type="showPassword ? 'text' : 'password'"
@@ -29,11 +49,34 @@
                 class="rounded-input mb-3"
                 aria-describedby="password-description"
               ></v-text-field>
+              <v-text-field
+                label="Confirm Password"
+                v-model="confirmPassword"
+                :rules="[v => !!v || 'Confirm password is required', v => v === password || 'Passwords do not match']"
+                :type="showConfirmPassword ? 'text' : 'password'"
+                :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                @click:append-inner="toggleShowConfirmPassword"
+                clearable
+                variant="outlined"
+                dense
+                class="rounded-input mb-3"
+                aria-describedby="confirm-password-description"
+              ></v-text-field>
+              <v-text-field
+                label="Email"
+                v-model="email"
+                :rules="emailRules"
+                variant="outlined"
+                dense
+                clearable
+                class="rounded-input mb-3"
+                aria-describedby="email-description"
+              ></v-text-field>
               <v-alert
-                v-if="loginError"
+                v-if="registerError"
                 type="error"
                 dismissible
-                @input="loginError = false"
+                @input="registerError = false"
               >
                 {{ errorMessage }}
               </v-alert>
@@ -43,16 +86,16 @@
                 large
                 type="submit"
               >
-                Login
+                Register
               </v-btn>
               <v-btn
                 class="rounded-btn my-2"
                 block
                 large
                 type="link"
-                href="../../views/Register.vue"
+                href="../Login/Login.vue"
               >
-                Register
+                Login
               </v-btn>
             </v-form>
           </v-card-text>
@@ -63,7 +106,6 @@
 </template>
 
 <script>
-
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -73,11 +115,22 @@ export default {
   },
   data() {
     return {
+      firstName: '',
+      lastName: '',
+      username: '',
       email: '',
       password: '',
+      confirmPassword: '',
       showPassword: false,
-      loginError: false,
+      showConfirmPassword: false,
+      registerError: false,
       errorMessage: '',
+      nameRules: [
+        v => !!v || 'Field is required',
+      ],
+      usernameRules: [
+        v => !!v || 'Username is required',
+      ],
       emailRules: [
         v => !!v || 'Email is required',
         v => /.+@.+\..+/.test(v) || 'Email must be valid'
@@ -92,9 +145,17 @@ export default {
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
     },
+    toggleShowConfirmPassword() {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    },
+    submitForm() {
+      // Implement your registration logic here
+      // For example, you can make an HTTP request to a backend API
+    }
   }
 };
 </script>
+
 <style scoped>
 /* Card styling */
 .rounded-card {
@@ -112,7 +173,7 @@ export default {
   border-radius: 25px; /* Button border radius */
   /* Light mode button styles */
   background-color: #aa4ae2; /* Light mode button color */
-  color: #FFFFFF; /*rgb(160, 74, 226)mode button text color */
+  color: #FFFFFF; /* Light mode button text color */
 }
 
 /* Dark mode specific styles */
@@ -123,4 +184,3 @@ export default {
 
 /* Additional styles or overrides can be added here */
 </style>
-
