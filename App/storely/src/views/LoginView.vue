@@ -63,8 +63,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh; /* Full viewport height */
-  padding: 20px; /* Padding to prevent content touching the edges */
+  min-height: 100vh; /* Full viewport height */;
+  padding: 0px; /* Padding to prevent content touching the edges */
   background-image: url('../assets/Loginback.svg'); /* Update the path as needed */
   background-size: cover; /* Cover the entire container */
   background-position: center; /* Center the background image */

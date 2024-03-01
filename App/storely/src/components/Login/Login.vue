@@ -16,18 +16,35 @@
               </template>
               
               <!-- Register Form -->
-              <template v-else>
-                <v-text-field label="First Name" v-model="firstName" :rules="nameRules" variant="outlined" dense clearable class="rounded-input mb-3"></v-text-field>
-                <v-text-field label="Last Name" v-model="lastName" :rules="nameRules" variant="outlined" dense clearable class="rounded-input mb-3"></v-text-field>
-                <v-text-field label="Username" v-model="username" :rules="usernameRules" variant="outlined" dense clearable class="rounded-input mb-3"></v-text-field>
-                <v-text-field label="Create Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-3"></v-text-field>
-                <v-text-field label="Confirm Password" v-model="confirmPassword" :rules="['Passwords must match', v => v === password || 'Passwords do not match']" :type="showConfirmPassword ? 'text' : 'password'" :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowConfirmPassword" clearable variant="outlined" dense class="rounded-input mb-3"></v-text-field>
-                <v-text-field label="Email" v-model="email" :rules="emailRules" variant="outlined" dense clearable class="rounded-input mb-3"></v-text-field>
+              <template v-else class="Register">
+                <v-row>
+                  <v-col cols="6">
+                    <v-text-field label="First Name" v-model="firstName" :rules="nameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field label="Last Name" v-model="lastName" :rules="nameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="6">
+                    <v-text-field label="Username" v-model="username" :rules="usernameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field label="Email" v-model="email" :rules="emailRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="6">
+                    <v-text-field label="Create Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field label="Confirm Password" v-model="confirmPassword" :rules="['Passwords must match', v => v === password || 'Passwords do not match']" :type="showConfirmPassword ? 'text' : 'password'" :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowConfirmPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
+                  </v-col>
+                </v-row>
                 <v-alert v-if="registerError" type="error" dismissible @input="registerError = false">{{ errorMessage }}</v-alert>
                 <v-btn class="rounded-btn my-2" block large type="submit">Register</v-btn>
               </template>
               
-              <!-- Toggle Form Button -->
               <!-- Toggle Form Button -->
               <div class="text-center">
                 <btn text small class="switch-btn my-2" @click="toggleForm">
@@ -42,6 +59,7 @@
     </v-row>
   </v-container>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -158,6 +176,16 @@ export default {
 }
 .dark-mode .switch-btn{
   color: rgb(219, 219, 219);
+}
+
+/* Reduced margin between input fields in the register form */
+.Register .rounded-input {
+  margin-bottom: 0.5rem;
+}
+
+/* Increased padding for the card */
+.Register .rounded-card {
+  padding: 1.5rem;
 }
 
 </style>
