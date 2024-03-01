@@ -26,18 +26,18 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="6">
+                  <v-col cols="6" style="margin-top: -2.5rem;">
                     <v-text-field label="Username" v-model="username" :rules="usernameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
                   </v-col>
-                  <v-col cols="6">
+                  <v-col cols="6" style="margin-top: -2.5rem;">
                     <v-text-field label="Email" v-model="email" :rules="emailRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="6">
-                    <v-text-field label="Create Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
+                  <v-col cols="12" style="margin-top: -2.5rem;">
+                    <v-text-field label="Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
                   </v-col>
-                  <v-col cols="6">
+                  <v-col cols="12" style="margin-top: -2.5rem;">
                     <v-text-field label="Confirm Password" v-model="confirmPassword" :rules="['Passwords must match', v => v === password || 'Passwords do not match']" :type="showConfirmPassword ? 'text' : 'password'" :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowConfirmPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
                   </v-col>
                 </v-row>
