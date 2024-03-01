@@ -10,7 +10,7 @@
               <!-- Login Form -->
               <template v-if="isLogin">
                 <v-text-field label="Email Address" v-model="email" :rules="emailRules" variant="outlined" dense clearable class="rounded-input mb-3"></v-text-field>
-                <v-text-field label="Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-3"></v-text-field>
+                <v-text-field style="margin-top: -1rem;" label="Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-3"></v-text-field>
                 <v-alert v-if="loginError" type="error" dismissible @input="loginError = false">{{ errorMessage }}</v-alert>
                 <v-btn class="rounded-btn my-2" block large type="submit">Login</v-btn>
               </template>
