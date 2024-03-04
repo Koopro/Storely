@@ -10,7 +10,7 @@
               <!-- Login Form -->
               <template v-if="isLogin">
                 <v-text-field label="Email Address" v-model="email" :rules="emailRules" variant="outlined" dense clearable class="rounded-input mb-3"></v-text-field>
-                <v-text-field label="Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-3"></v-text-field>
+                <v-text-field style="margin-top: -1rem;" label="Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-3"></v-text-field>
                 <v-alert v-if="loginError" type="error" dismissible @input="loginError = false">{{ errorMessage }}</v-alert>
                 <v-btn class="rounded-btn my-2" block large type="submit">Login</v-btn>
               </template>
@@ -26,18 +26,18 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="6">
+                  <v-col cols="6" style="margin-top: -2.5rem;">
                     <v-text-field label="Username" v-model="username" :rules="usernameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
                   </v-col>
-                  <v-col cols="6">
+                  <v-col cols="6" style="margin-top: -2.5rem;">
                     <v-text-field label="Email" v-model="email" :rules="emailRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="6">
-                    <v-text-field label="Create Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
+                  <v-col cols="12" style="margin-top: -2.5rem;">
+                    <v-text-field label="Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
                   </v-col>
-                  <v-col cols="6">
+                  <v-col cols="12" style="margin-top: -2.5rem;">
                     <v-text-field
                       label="Confirm Password"
                       v-model="confirmPassword"
