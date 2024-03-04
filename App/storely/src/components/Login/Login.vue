@@ -19,10 +19,10 @@
               <template v-else class="Register">
                 <v-row>
                   <v-col cols="6">
-                    <v-text-field label="First Name" v-model="firstName" :rules="nameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
+                    <v-text-field label="First Name" v-model="name" :rules="nameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
                   </v-col>
                   <v-col cols="6">
-                    <v-text-field label="Last Name" v-model="lastName" :rules="nameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
+                    <v-text-field label="Last Name" v-model="lastname" :rules="nameRules" variant="outlined" dense clearable class="rounded-input mb-2"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -38,7 +38,17 @@
                     <v-text-field label="Create Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
                   </v-col>
                   <v-col cols="6">
-                    <v-text-field label="Confirm Password" v-model="confirmPassword" :rules="['Passwords must match', v => v === password || 'Passwords do not match']" :type="showConfirmPassword ? 'text' : 'password'" :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowConfirmPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
+                    <v-text-field
+                      label="Confirm Password"
+                      v-model="confirmPassword"
+                      :rules="confirmPasswordRules"
+                      :type="showConfirmPassword ? 'text' : 'password'"
+                      :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                      @click:append-inner="toggleShowConfirmPassword"
+                      clearable
+                      variant="outlined"
+                      dense
+                      class="rounded-input mb-2"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-alert v-if="registerError" type="error" dismissible @input="registerError = false">{{ errorMessage }}</v-alert>
@@ -78,8 +88,8 @@ export default {
       // Login specific fields
       loginError: false,
       // Register specific fields
-      firstName: '',
-      lastName: '',
+      name: '',
+      lastname: '',
       username: '',
       confirmPassword: '',
       showConfirmPassword: false,
@@ -100,6 +110,10 @@ export default {
       usernameRules: [
         v => !!v || 'Username is required',
       ],
+      confirmPasswordRules: [
+      v => !!v || 'Confirm Password is required',
+      v => this.confirmPasswordMatchRule()
+     ],
       errorMessage: '',
       isLogin: true // Toggle between login and register form
     };
@@ -114,12 +128,68 @@ export default {
     toggleShowConfirmPassword() {
       this.showConfirmPassword = !this.showConfirmPassword;
     },
-    submitLoginForm() {
-      // Login form submission logic here
+    confirmPasswordMatchRule() {
+    return this.confirmPassword === this.password || 'Passwords do not match';
     },
-    submitRegisterForm() {
-      // Register form submission logic here
+    async submitLoginForm() {
+      try {
+        const response = await axios.post('http://localhost:3000/api/login', {
+          email: this.email,
+          password: this.password,
+        });
+
+        // Assuming the response includes a token you want to store
+        localStorage.setItem('authToken', response.data.token);
+
+        // Redirect the user to the home page after successful login
+        this.$router.push({ name: 'home' });
+
+        // Reset the form and any error messages
+        this.loginError = false;
+        this.errorMessage = '';
+      } catch (error) {
+        // Handle errors, such as showing a message to the user
+        this.loginError = true;
+        this.errorMessage = 'Failed to login. Please check your credentials.';
+      }
+    },
+
+    async submitRegisterForm() {
+      try {
+        const response = await axios.post('http://localhost:3000/api/register', {
+          name: this.name,
+          lastname: this.lastname,
+          username: this.username,
+          email: this.email,
+          password: this.password,
+          role: 'user',
+          }, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(response => {
+            console.log('Success: ' , response.data);
+            this.$router.push({ name: 'home' });
+          }).catch(error => {
+            console.log('Error: ' , error.response.data);
+          })
+
+        // Handle response, e.g., redirecting the user, storing the token, etc.
+        console.log(response.data);
+        // Optionally, handle the response, such as automatically logging the user in
+        // For now, let's just redirect to the login page for them to log in manually
+        this.$router.push({ name: 'login' });
+
+        // Reset the form and any error messages
+        this.registerError = false;
+        this.errorMessage = '';
+      } catch (error) {
+        // Handle errors, such as showing an error message
+        this.registerError = true;
+        this.errorMessage = 'Registration failed. Please try again.';
+      }
     }
+
   }
 };
 </script>
