@@ -176,10 +176,7 @@ export default {
 
         // Assuming the backend sends a response indicating the user needs to confirm their email
         if(response.data.message) {
-          // Display a message to the user to check their email for the confirmation link
-          // You might want to use a dialog, snackbar, or another component to show the message
-          this.confirmationMessage = response.data.message; // Make sure to add `confirmationMessage` in your data
-          // Reset the form fields if needed
+          this.confirmationMessage = response.data.message;
         }
       } catch (error) {
         console.log('Error: ' , error.response.data);
