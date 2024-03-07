@@ -1,7 +1,7 @@
 <template>
   <v-list-item link class="rounded-btn" @click="toggleDarkMode">
     <v-list-item-icon>
-      <v-icon :class="`fa ${darkMode ? 'fa-sun' : 'fa-moon'}`"></v-icon>
+      <v-icon :class="`mdi ${darkMode ? 'mdi-white-balance-sunny' : 'mdi-weather-night'}`"></v-icon>
     </v-list-item-icon>
   </v-list-item>
 </template>

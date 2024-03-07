@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['admin', 'owner', 'user'],
     default: 'user'
-  }
+  },
 });
 
 // Pre-save hook to hash password

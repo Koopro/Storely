@@ -32,18 +32,24 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  // Assume `isLoggedIn` is a method to check login status
-  const isAuthenticated = isLoggedIn(); // You need to implement this function
+const publicPages = ['login']; // Add other public route names as needed
 
-  if (!isAuthenticated && to.name !== 'login') {
-    // If the user is not authenticated and is trying to access a page other than login, redirect to login page
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = isLoggedIn(); // Ensure this checks auth token validity
+  const isPublicPage = publicPages.includes(to.name);
+
+  if (!isAuthenticated && !isPublicPage) {
+    // If the user is not authenticated and the page is not public, redirect to login page
     next({ name: 'login' });
+  } else if (isAuthenticated && to.name === 'login') {
+    // If the user is already authenticated and tries to access the login page, redirect to home
+    next({ name: 'home' });
   } else {
-    // Otherwise, proceed as normal
+    // Proceed to the page
     next();
   }
 });
+
 
 export default router;
 

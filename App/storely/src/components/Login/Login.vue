@@ -36,6 +36,7 @@
                 <v-row>
                   <v-col cols="12" style="margin-top: -1.8rem;">
                     <v-text-field label="Password" v-model="password" :rules="passwordRules" :type="showPassword ? 'text' : 'password'" :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" @click:append-inner="toggleShowPassword" clearable variant="outlined" dense class="rounded-input mb-2"></v-text-field>
+                    
                   </v-col>
                   <v-col cols="12" style="margin-top: -1.8rem;">
                     <v-text-field
@@ -53,6 +54,7 @@
                 </v-row>
                 <v-alert v-if="registerError" type="error" dismissible @input="registerError = false">{{ errorMessage }}</v-alert>
                 <v-btn class="rounded-btn my-2" block large type="submit">Register</v-btn>
+                <v-alert v-if="confirmationMessage" type="success" dismissible @input="confirmationMessage = ''">{{ confirmationMessage }}</v-alert>
               </template>
               
               <!-- Toggle Form Button -->
@@ -81,7 +83,7 @@ export default {
   },
   data() {
     return {
-      // Shared fields
+      confirmationMessage: '', 
       email: '',
       password: '',
       showPassword: false,
@@ -100,8 +102,11 @@ export default {
         v => /.+@.+\..+/.test(v) || 'Email must be valid'
       ],
       passwordRules: [
-        v => !!v || 'Password is required',
-        v => v.length >= 6 || 'Password must be at least 6 characters'
+          v => !!v || 'Password is required',
+          v => v.length >= 8 || 'Password must be at least 8 characters',
+          v => /[A-Z]/.test(v) || 'Password must contain at least one uppercase letter',
+          v => /[0-9]/.test(v) || 'Password must contain at least one number',
+          v => /[\W_]+/.test(v) || 'Password must contain at least one special character',
       ],
       // Register rules
       nameRules: [
@@ -163,28 +168,21 @@ export default {
           email: this.email,
           password: this.password,
           role: 'user',
-          }, {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }).then(response => {
-            console.log('Success: ' , response.data);
-            this.$router.push({ name: 'home' });
-          }).catch(error => {
-            console.log('Error: ' , error.response.data);
-          })
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-        // Handle response, e.g., redirecting the user, storing the token, etc.
-        console.log(response.data);
-        // Optionally, handle the response, such as automatically logging the user in
-        // For now, let's just redirect to the login page for them to log in manually
-        this.$router.push({ name: 'login' });
-
-        // Reset the form and any error messages
-        this.registerError = false;
-        this.errorMessage = '';
+        // Assuming the backend sends a response indicating the user needs to confirm their email
+        if(response.data.message) {
+          // Display a message to the user to check their email for the confirmation link
+          // You might want to use a dialog, snackbar, or another component to show the message
+          this.confirmationMessage = response.data.message; // Make sure to add `confirmationMessage` in your data
+          // Reset the form fields if needed
+        }
       } catch (error) {
-        // Handle errors, such as showing an error message
+        console.log('Error: ' , error.response.data);
         this.registerError = true;
         this.errorMessage = 'Registration failed. Please try again.';
       }
