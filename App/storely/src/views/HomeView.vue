@@ -1,8 +1,9 @@
 <template>
+  <sidebar></sidebar>
   <v-container>
     <!-- User Profile Section -->
     <user-profile v-if="currentUser" :user-profile="currentUser"></user-profile>
-
+    
     <!-- Add User Form -->
     <v-row justify="center">
       <v-col cols="12" sm="6" md="4">
@@ -59,10 +60,12 @@
 <script>
 import axios from 'axios';
 import UserProfile from '../components/Profile/UserProfileCard.vue';
+import Sidebar from '../components/sidebar/Sidebar.vue';
 
 export default {
   components: {
-    UserProfile
+    //Sidebar,
+    UserProfile,
   },
   data() {
     return {

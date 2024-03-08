@@ -1,37 +1,13 @@
 <template>
   <v-navigation-drawer app permanent :class="{ 'dark-mode': darkMode }" class="sidebar">
     <v-list dense class="sidebar-list">
-      <!-- Top Buttons -->
-      <div class="button-group">
-        <!-- Home Button -->
-        <v-list-item link class="rounded-btn" :class="{ 'active-button': isHomeActive }" to="/home">
-          <v-list-item-icon>
-            <v-icon class="fa fa-home"></v-icon>
-          </v-list-item-icon>
-        </v-list-item>
-
-        <!-- Calendar Button -->
-        <v-list-item link class="rounded-btn">
-          <v-list-item-icon>
-            <v-icon class="fa fa-calendar"></v-icon>
-          </v-list-item-icon>
-        </v-list-item>
-
-        <!-- Tasks Button -->
-        <v-list-item link class="rounded-btn">
-          <v-list-item-icon>
-            <v-icon class="fa fa-tasks"></v-icon>
-          </v-list-item-icon>
-        </v-list-item>
-      </div>
-
       <!-- Spacer -->
       <div class="spacer"></div>
 
       <!-- Bottom Buttons -->
       <div class="button-group">
         <!-- Profile Button -->
-        <v-list-item link class="rounded-btn" :class="{ 'active-button': isProfileActive }" to="/profile">
+        <v-list-item link class="rounded-btn"  to="/profile">
           <v-list-item-icon>
             <v-icon class="fa fa-user-circle"></v-icon>
           </v-list-item-icon>
@@ -57,9 +33,6 @@ export default {
     };
   },
   computed: {
-    isHomeActive() {
-      return this.$route.path === '/home';
-    },
     isProfileActive() {
       return this.$route.path === '/profile';
     }
@@ -114,27 +87,6 @@ export default {
   padding: 0;
   margin: 0;
   line-height: 1; /* Ensures the icon is aligned without extra space */
-}
-
-/* Additional button-specific adjustments */
-.v-icon.fa-home {
-  /* Adjust for home icon if needed */
-}
-
-.v-icon.fa-calendar {
-  /* Adjust for calendar icon if needed */
-}
-
-.v-icon.fa-tasks {
-  /* Adjust for tasks icon if needed */
-}
-
-.v-icon.fa-user-circle {
-  /* Adjust for user icon if needed */
-}
-
-.v-icon.fa-moon {
-  /* Adjust for moon icon if needed */
 }
 
 /* Ensure there's no extra padding or margins affecting the alignment */
