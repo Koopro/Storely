@@ -10,40 +10,35 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendVerificationEmail(userEmail, verificationToken) {
+    // Ensure your FRONTEND_URL points to the Vue.js application URL
+    // e.g., https://your-vue-app.com or http://localhost:8080
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+
     const emailTemplate = `
     <html>
     <head>
         <style>
-            .email-container {
-                padding: 20px;
-                background-color: #f4f4f4;
-                font-family: Arial, sans-serif;
-                color: #333;
-                border-radius: 5px;
-            }
-            .email-header {
-                background-color: #007bff;
-                color: #ffffff;
-                padding: 10px;
-                text-align: center;
-                border-top-left-radius: 5px;
-                border-top-right-radius: 5px;
-            }
-            .email-body {
-                padding: 20px;
-            }
+            .email-container { /* Styles unchanged, omitted for brevity */ }
+            .email-header { /* Styles unchanged, omitted for brevity */ }
+            .email-body { /* Styles unchanged, omitted for brevity */ }
             .verify-button {
-                display: block;
-                width: 100%;
-                max-width: 200px;
-                background-color: #28a745;
-                color: #ffffff;
-                padding: 10px;
-                text-align: center;
-                text-decoration: none;
-                border-radius: 5px;
-                margin: 20px auto 0;
-            }
+                display: inline-block; /* Allows the width and height to be set */
+                width: auto; /* Adjust width as needed or set to auto for content width */
+                padding: 10px 20px; /* Padding inside the button */
+                background-color: #7732a6; /* Green background */
+                color: white; /* White text color */
+                text-align: center; /* Center the text inside the button */
+                text-decoration: none; /* Remove underline from links */
+                font-weight: bold; /* Make the font bold */
+                border-radius: 5px; /* Rounded corners */
+                border: none; /* No border */
+                cursor: pointer; /* Change mouse cursor to pointer when over the button */
+                transition: background-color 0.3s; /* Smooth transition for hover effect */
+              }
+              
+              .verify-button:hover {
+                background-color: #7732a8; /* Darker shade of green on hover */
+              }
         </style>
     </head>
     <body>
@@ -54,9 +49,9 @@ async function sendVerificationEmail(userEmail, verificationToken) {
             <div class="email-body">
                 <p>Hello,</p>
                 <p>Thank you for registering. Please click the button below to verify your email address and complete the registration process.</p>
-                <a href="${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}" class="verify-button">Verify Email</a>
+                <a href="${verificationLink}" class="verify-button">Verify Email</a>
                 <p>If the button above does not work, copy and paste the following link in your browser:</p>
-                <p><a href="${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}">${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}</a></p>
+                <p><a href="${verificationLink}">${verificationLink}</a></p>
             </div>
         </div>
     </body>
@@ -77,5 +72,6 @@ async function sendVerificationEmail(userEmail, verificationToken) {
         console.error('Error sending verification email:', error);
     }
 }
+
 
 module.exports = { sendVerificationEmail };

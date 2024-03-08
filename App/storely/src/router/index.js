@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue';
 import ProfileView from '../views/ProfileView.vue';
 import LoginView from '../views/LoginView.vue';
 import TestView from '../views/TestView.vue';
+import VerifyEmail from '../components/EmailVerification.vue';
 
 const routes = [
   {
@@ -25,6 +26,11 @@ const routes = [
     name: 'testing',
     component: TestView,
   },
+  {
+    path: '/verify-email',
+    name: 'verify-email',
+    component: VerifyEmail,
+  }
 ];
 
 const router = createRouter({
@@ -32,7 +38,7 @@ const router = createRouter({
   routes
 });
 
-const publicPages = ['login']; // Add other public route names as needed
+const publicPages = ['login', 'verify-email']; // Add other public route names as needed
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = isLoggedIn(); // Ensure this checks auth token validity

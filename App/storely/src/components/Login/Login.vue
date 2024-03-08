@@ -53,8 +53,8 @@
                   </v-col>
                 </v-row>
                 <v-alert v-if="registerError" type="error" dismissible @input="registerError = false">{{ errorMessage }}</v-alert>
-                <v-btn class="rounded-btn my-2" block large type="submit">Register</v-btn>
                 <v-alert v-if="confirmationMessage" type="success" dismissible @input="confirmationMessage = ''">{{ confirmationMessage }}</v-alert>
+                <v-btn class="rounded-btn my-2" block large type="submit">Register</v-btn>
               </template>
               
               <!-- Toggle Form Button -->
