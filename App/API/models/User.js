@@ -37,9 +37,14 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: false 
   },
-  // New field for storing profile image URL/path
-  profileImageUrl: { type: String, default: '' }, // For storing image URL/path
-  profileImageName: { type: String, default: '' }, // Optional, for storing image name
+  profileImageUrl: {
+    type: String,
+    default: '/uploads/profile/default/default.png' // Adjust this path to your default image
+  },
+  profileImageName: { 
+    type: String,
+    default: 'default.png'
+  },
 });
 
 // Pre-save hook to hash password

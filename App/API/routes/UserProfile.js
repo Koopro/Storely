@@ -1,91 +1,150 @@
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const User = require('../models/User'); // Adjust the path as necessary
-const authMiddleware = require('../middleware/authMiddleware'); // Ensure this middleware is correctly implemented
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const User = require("../models/User");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// Define the directory for profile image uploads
-const uploadsDir = path.join(__dirname, '..', 'uploads', 'profile');
+// Directory for profile image uploads
+const uploadsDir = path.join(__dirname, "..", "uploads", "profile");
+const defaultImage = "/uploads/profile/default/default.png"; // Path to your default image
 
-
-// Create the directory if it does not exist
+// Ensure uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configure Multer's storage settings
+// Multer storage settings
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: async (req, file, cb) => {
+    const user = await User.findById(req.userData.userId);
+    const fileExtension = path.extname(file.originalname);
+    const newFilename = `${user._id}-${Date.now()}${fileExtension}`;
+    cb(null, newFilename);
   },
-  filename: (req, file, cb) => {
-    // Generate a unique filename to avoid collisions
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
 });
 
-// Initialize Multer with the defined storage settings
-const upload = multer({ 
-  storage: storage, 
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
-  fileFilter: (req, file, cb) => {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-      return cb(new Error('Only image files are allowed!'), false);
-    }
-    cb(null, true);
-  }
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) =>
+    cb(null, /\.(jpg|jpeg|png|gif)$/i.test(file.originalname)),
 });
 
 const router = express.Router();
 
-// Endpoint to upload profile image
-router.post('/uploadProfileImage', authMiddleware, upload.single('profileImage'), async (req, res) => {
+router.post(
+  "/uploadProfileImage",
+  authMiddleware,
+  upload.single("profileImage"),
+  async (req, res) => {
     if (!req.file) {
-      return res.status(400).json({ message: 'Please upload a file.' });
+      return res.status(400).json({ message: "Please upload a file." });
     }
-  
+
     try {
       const user = await User.findById(req.userData.userId);
       if (!user) {
-        return res.status(404).json({ message: 'User not found.' });
+        return res.status(404).json({ message: "User not found." });
       }
-  
-      // Assuming your server is set up to serve static files from 'uploadsDir'
-      // Construct the file path or URL to be saved
-      const filePath = `/uploads/profile/${req.file.filename}`; // Adjust as necessary
-  
-      // Update user document with image path and name
-      user.profileImageUrl = filePath; // Save the file path
-      user.profileImageName = req.file.originalname; // Optionally save the file name
-  
-      await user.save(); // Save changes to the user document
-  
+
+      // If user has an old image that's not the default, remove it
+      if (user.profileImageUrl && user.profileImageUrl !== defaultImage) {
+        const oldImagePath = path.join(
+          uploadsDir,
+          path.basename(user.profileImageUrl)
+        );
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath); // Use sync version for simplicity
+        }
+      }
+
+      // Construct a unique filename using user ID and timestamp
+      const newFilename = `${req.userData.userId}-${Date.now()}${path.extname(
+        req.file.originalname
+      )}`;
+      const filePath = `/uploads/profile/${newFilename}`;
+
+      user.profileImageUrl = filePath;
+      user.profileImageName = req.file.originalname;
+
+      await user.save();
+
       res.status(200).json({
-        message: 'File uploaded successfully',
-        filePath: user.profileImageUrl, // Return the saved path
-        fileName: user.profileImageName, // Optionally return the saved file name
+        message: "File uploaded successfully",
+        filePath: user.profileImageUrl,
+        fileName: user.profileImageName,
       });
     } catch (error) {
-      console.error('Failed to update user profile image:', error);
-      res.status(500).json({ message: 'Failed to update user profile image', error: error.message });
+      console.error("Failed to update user profile image:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to update user profile image",
+          error: error.message,
+        });
     }
-  });
+  }
+);
 
-  router.get('/user/profile', authMiddleware, async (req, res) => {
+// Fetch user profile endpoint
+router.get("/user/profile", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userData.userId).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (error) {
+    console.error("Failed to fetch user profile:", error);
+    res
+      .status(500)
+      .json({
+        message: "Failed to fetch user profile",
+        error: error.toString(),
+      });
+  }
+});
+
+// Update profile endpoint
+router.post(
+  "/updateProfile",
+  authMiddleware,
+  upload.single("profileImage"),
+  async (req, res) => {
     try {
-      // Assuming `req.userData.userId` is set by your `authMiddleware`
-      const user = await User.findById(req.userData.userId).select('-password'); // Exclude the password from the result
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      const { name, lastname } = req.body;
+      const user = await User.findById(req.userData.userId);
+      if (!user) return res.status(404).json({ message: "User not found." });
+
+      // Update fields
+      if (name) user.name = name;
+      if (lastname) user.lastname = lastname;
+
+      // Update image if provided
+      if (req.file) {
+        // Remove old image
+        if (user.profileImageUrl) {
+          const oldImagePath = path.join(
+            uploadsDir,
+            path.basename(user.profileImageUrl)
+          );
+          fs.unlink(oldImagePath, (err) => {
+            if (err) console.log("Error removing old image:", err);
+          });
+        }
+        user.profileImageUrl = `/uploads/profile/${req.file.filename}`;
+        user.profileImageName = req.file.originalname;
       }
-      res.json(user); // Send user information back to client
+
+      await user.save();
+      res.json({ message: "Profile updated successfully", user });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch user profile', error: error.message });
+      console.error("Failed to update profile:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to update profile", error: error.toString() });
     }
-  });
-  
-  
-  
+  }
+);
 
 module.exports = router;
