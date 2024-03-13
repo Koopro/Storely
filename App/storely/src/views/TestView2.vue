@@ -27,88 +27,81 @@
         </div>
         <!-- Spacer -->
         <div class="spacer"></div>
+        <!-- Bottom Links -->
+        <div class="bottom-links">
+          <dark-mode-toggle :value="darkMode" @change="toggleDarkMode" :style="{ color: darkMode ? 'white' : 'black', backgroundColor: darkMode ? '#333' : '#ccc' }" />
+        </div>
       </div>
     </div>
-  </div>
-</template>
-
-<script>
-import DarkModeToggle from '../components/sidebar/DarkModeToggle.vue';
-
-export default {
-  name: 'Sidebar',
-  components: {
-    DarkModeToggle
-  },
-  data() {
-    return {
-      darkMode: false,
-      isExpanded: false
-    };
-  },
-  methods: {
-    toggleDarkMode(value) {
-      this.darkMode = value;
-      document.documentElement.style.backgroundColor = this.darkMode ? '#333' : '#ccc'; // Ändert den Hintergrund des html-Elements
+  </template>
+  
+  <script>
+  import DarkModeToggle from '../components/sidebar/DarkModeToggle.vue';
+  
+  export default {
+    name: 'Sidebar',
+    components: {
+      DarkModeToggle
     },
-    expandSidebar() {
-      this.isExpanded = true;
+    data() {
+      return {
+        darkMode: false
+      };
     },
-    collapseSidebar() {
-      this.isExpanded = false;
+    methods: {
+      toggleDarkMode(value) {
+        this.darkMode = value;
+      }
     }
+  };
+  </script>
+  
+  <style scoped>
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 150px;
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 1000;
   }
-};
-</script>
+  
+  .sidebar-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  
+  .top-links {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .bottom-links {
+    margin-top: auto;
+  }
+  
+  .sidebar-link {
+    text-decoration: none;
+    padding: 10px 0;
+    border-bottom: 1px solid #555;
+  }
+  
 
-<style scoped>
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 50px;
-  padding: 20px;
-  overflow-y: hidden; /* Verhindert Scrollen */
-  z-index: 1000;
-  transition: width 0.3s;
-  background-color: #666; /* Dunklerer Grauton für die Sidebar */
-}
-
-.expanded {
-  width: 150px;
-}
-
-.sidebar-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100vh; /* 100% Höhe des Viewports */
-}
-
-.top-links {
-  display: flex;
-  flex-direction: column;
-}
-
-.bottom-links {
-  margin-top: auto;
-}
-
-.sidebar-link {
-  text-decoration: none;
-  padding: 10px 0;
-  border-bottom: 1px solid #555;
-}
-
-.sidebar-link:hover .link-name {
-  display: inline-block;
-}
-
-.dark-mode-toggle-container {
-  position: absolute;
-  bottom: 20px; /* Anpassen der unteren Position */
-  left: 50%; /* Zentrieren des Buttons */
-  transform: translateX(-50%);
-}
-</style>
+  
+  .dark-mode-toggle {
+    margin-top: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  </style>
+  
