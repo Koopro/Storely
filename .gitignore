@@ -1,5 +1,0 @@
-.env*
-
-git add .
-git commit -m 'Remove .env files from repository'
-git push
