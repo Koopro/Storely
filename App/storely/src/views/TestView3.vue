@@ -3,6 +3,9 @@
       <v-hover>
         <div class="image-container" @click="editMode ? triggerFileInput() : null">
           <img :src="user.profileImageUrl" alt="Profile Image" class="profile-image">
+          <!-- Add this inside your UserProfile.vue template, where you want to display the status -->
+          <UserStatus :user="user" :editMode="editMode" @statusUpdated="fetchUserProfile" />
+
           <div v-if="editMode" class="overlay">
             <v-icon color="white" size="48" @click.stop="triggerFileInput">mdi-pencil-outline</v-icon>
           </div>
@@ -11,15 +14,17 @@
       
       <!-- Conditional rendering for viewing or editing profile -->
       <div v-if="!editMode">
-        <h2>{{ user.name }} {{ user.lastname }}</h2>
+        <h2>{{ user.username }} </h2>
         <v-btn color="primary" @click="enableEditMode">Edit Profile</v-btn>
       </div>
       <div v-else>
+        <v-text-field label="Username" v-model="editableUsername" outlined dense></v-text-field>
         <v-text-field label="Name" v-model="editableName" outlined dense></v-text-field>
         <v-text-field label="Lastname" v-model="editableLastname" outlined dense></v-text-field>
         <v-btn color="success" @click="saveProfile" :disabled="isSaving">Save</v-btn>
         <v-btn color="grey" @click="cancelEdit">Cancel</v-btn>
       </div>
+
   
       <!-- File input for selecting new image, hidden -->
       <input type="file" ref="fileInput" @change="previewImage" hidden>
@@ -78,8 +83,12 @@
 
   <script>
   import axios from 'axios';
+  import UserStatus from '../components/User/UserStatus.vue';
   
   export default {
+    components: {
+      UserStatus,
+    },
     data() {
       return {
         user: null,
@@ -88,6 +97,7 @@
         isSaving: false,
         editableName: '',
         editableLastname: '',
+        editableUsername: '', // Added editableUsername
         alert: {
           show: false,
           type: '', // 'success', 'error'
@@ -108,6 +118,7 @@
           this.user.profileImageUrl = `http://localhost:3000${this.user.profileImageUrl}`;
           this.editableName = this.user.name;
           this.editableLastname = this.user.lastname;
+          this.editableUsername = this.user.username; // Initialize editableUsername
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }
@@ -127,9 +138,10 @@
         if (this.selectedFile) {
           formData.append('profileImage', this.selectedFile);
         }
-        formData.append('name', this.editableName);
+        formData.append('name', this.editableName); 
         formData.append('lastname', this.editableLastname);
-  
+        formData.append('username', this.editableUsername); // Add username to the formData
+    
         try {
           await axios.post('http://localhost:3000/api/updateProfile', formData, {
             headers: {
@@ -157,5 +169,4 @@
     },
   };
   </script>
-  
   

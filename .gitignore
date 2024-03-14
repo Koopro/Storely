@@ -1,0 +1,5 @@
+git rm -r --cached .env
+
+git add .
+git commit -m 'your message'
+git push

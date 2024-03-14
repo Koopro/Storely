@@ -1,4 +1,4 @@
-<template>
+  <template>
   <v-container fluid>
     <v-row align="center" justify="center" class="fill-height">
       <v-col cols="12" sm="8" md="6" lg="4">
@@ -178,13 +178,13 @@ export default {
         if(response.data.message) {
           this.confirmationMessage = response.data.message;
         }
+        
       } catch (error) {
         console.log('Error: ' , error.response.data);
         this.registerError = true;
         this.errorMessage = 'Registration failed. Please try again.';
       }
-    }
-
+    },
   }
 };
 </script>

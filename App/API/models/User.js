@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'default.png'
   },
+  status: {
+    type: String,
+    enum: ['online', 'offline', 'disturb', 'away'],
+    default: 'offline'
+  },  
 });
 
 // Pre-save hook to hash password
