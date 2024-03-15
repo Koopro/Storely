@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendVerificationEmail } = require('./services/emailService'); 
+const adminMiddleware = require('../middleware/adminMiddleware'); // Adjust path as necessary
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Registration
 router.post('/register', async (req, res) => {
@@ -90,5 +92,20 @@ router.post('/login', async (req, res) => {
     res.status(400).send(error);
   }
 });
+
+module.exports = router;
+
+router.get('/admin/data', [authMiddleware, adminMiddleware], async (req, res) => {
+  try {
+    const users = await User.find({}).select("-password"); // Fetch all users excluding their passwords
+    console.log('Admin data route accessed, returning all user data');
+    res.json(users); // Send the list of users as a JSON response
+  } catch (error) {
+    console.error('Error in admin data route:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 
 module.exports = router;

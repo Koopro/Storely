@@ -5,6 +5,7 @@ const fs = require("fs");
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
 
+
 // Directory for profile image uploads
 const uploadsDir = path.join(__dirname, "..", "uploads", "profile");
 const defaultImage = "/uploads/profile/default/default.png"; // Path to your default image
@@ -146,5 +147,31 @@ router.post(
     }
   }
 );
+
+//Update Status
+router.post("/updateStatus", authMiddleware, async (req, res) => {
+  const { status } = req.body;
+
+  try {
+    const user = await User.findById(req.userData.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Update the user's status and save the changes
+    user.status = status;
+    await user.save();
+
+    // Console logging for monitoring purposes
+    console.log(`User ${user._id} status updated to ${status}`);
+
+    res.json({ message: "Status updated successfully" });
+  } catch (error) {
+    console.error("Error updating status:", error);
+    res.status(500).json({ message: "Failed to update status", error: error.toString() });
+  }
+});
+
+
 
 module.exports = router;

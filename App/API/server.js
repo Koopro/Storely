@@ -11,21 +11,26 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// MongoDB URI from environment variables
-const uri = process.env.MONGO_URI;
+// Use the second MongoDB URI directly
+const uri2 = process.env.MONGO_URI2;
 
-// Create a new MongoClient
-const client = new MongoClient(uri, {
-  serverApi: ServerApiVersion.v1,
-});
+// Function to create a new MongoClient using uri2
+function createMongoClient(uri) {
+  return new MongoClient(uri, {
+    serverApi: ServerApiVersion.v1,
+  });
+}
 
-async function runMongoClient() {
+// Initial MongoClient using uri2
+let client = createMongoClient(uri2);
+
+async function runMongoClient(client) {
   try {
     await client.connect();
-    await client.db("admin").command({ ping: 1 });
-    console.log("Connected successfully to MongoDB using MongoClient");
+    await client.db("storely").command({ ping: 1 });
+    console.log("Connected successfully to MongoDB using MongoClient with uri2");
   } catch (err) {
-    console.error("Could not connect to MongoDB using MongoClient", err);
+    console.error("Could not connect to MongoDB using MongoClient with uri2", err);
   }
 }
 
@@ -36,12 +41,12 @@ app.use('/api', authRoutes);
 app.use('/api', userProfileRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// MongoDB Connection using Mongoose
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+// MongoDB Connection using Mongoose with uri2
+mongoose.connect(uri2, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    console.log('Connected to MongoDB using Mongoose');
-    runMongoClient(); // Run MongoClient connection
+    console.log('Connected to MongoDB using Mongoose with uri2');
+    runMongoClient(client); // Run MongoClient connection using uri2
   })
-  .catch(err => console.error('Could not connect to MongoDB using Mongoose', err));
+  .catch(err => console.error('Could not connect to MongoDB using Mongoose with uri2', err));
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
