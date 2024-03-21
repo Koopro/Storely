@@ -15,31 +15,71 @@ async function sendVerificationEmail(userEmail, verificationToken) {
     const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
     const emailTemplate = `
-    <html>
+    <!DOCTYPE html>
+    <html lang="en">
     <head>
-        <style>
-            .email-container { /* Styles unchanged, omitted for brevity */ }
-            .email-header { /* Styles unchanged, omitted for brevity */ }
-            .email-body { /* Styles unchanged, omitted for brevity */ }
-            .verify-button {
-                display: inline-block; /* Allows the width and height to be set */
-                width: auto; /* Adjust width as needed or set to auto for content width */
-                padding: 10px 20px; /* Padding inside the button */
-                background-color: #7732a6; /* Green background */
-                color: white; /* White text color */
-                text-align: center; /* Center the text inside the button */
-                text-decoration: none; /* Remove underline from links */
-                font-weight: bold; /* Make the font bold */
-                border-radius: 5px; /* Rounded corners */
-                border: none; /* No border */
-                cursor: pointer; /* Change mouse cursor to pointer when over the button */
-                transition: background-color 0.3s; /* Smooth transition for hover effect */
-              }
-              
-              .verify-button:hover {
-                background-color: #7732a8; /* Darker shade of green on hover */
-              }
-        </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .email-header {
+            background-color: #4A90E2;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .email-body {
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .verify-button {
+            display: inline-block;
+            background-color: #32a852; /* More vibrant green */
+            color: #ffffff;
+            padding: 12px 25px;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0; /* Add some margin for spacing */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .verify-button:hover {
+            background-color: #286442; /* Darker green on hover */
+        }
+        a {
+            color: #4A90E2;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 20px;
+            }
+        }
+    </style>
     </head>
     <body>
         <div class="email-container">
@@ -56,6 +96,7 @@ async function sendVerificationEmail(userEmail, verificationToken) {
         </div>
     </body>
     </html>
+    
     `;
 
     const mailOptions = {

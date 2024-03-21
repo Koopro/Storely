@@ -103,14 +103,14 @@ export default {
           if (this.imageFile) {
             const formData = new FormData();
             formData.append('image', this.imageFile);
-            const imageResponse = await axios.post('http://localhost:3000/upload', formData, {
+            const imageResponse = await axios.post(`${process.env.VUE_APP_API_URL}/upload`, formData, {
               headers: {
                 'Content-Type': 'multipart/form-data'
               }
             });
             this.user.imageURL = imageResponse.data.filePath;
           }
-          await axios.post('http://localhost:3000/add-user', this.user);
+          await axios.post(`${process.env.VUE_APP_API_URL}/add-user`, this.user);
           this.message = 'User added successfully';
           this.snackbarColor = 'success';
           this.resetForm();
@@ -131,7 +131,7 @@ export default {
     },
     async fetchCurrentUser() {
       try {
-        const response = await axios.get('http://localhost:3000/profile');
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/profile`);
         this.currentUser = response.data;
       } catch (error) {
         console.error('Error fetching current user:', error);

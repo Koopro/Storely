@@ -39,7 +39,7 @@ export default {
               if (!token) {
               throw new Error('Verification token is missing.');
               }
-              await axios.get(`http://localhost:3000/api/verify-email?token=${token}`);
+              await axios.get(`${process.env.VUE_APP_API_URL}/api/verify-email?token=${token}`);
               
               this.alert.show = true;
               this.alert.type = 'success';

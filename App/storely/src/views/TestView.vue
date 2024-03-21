@@ -66,7 +66,7 @@ export default {
   }
 
   try {
-    const response = await axios.post('http://localhost:3000/api/uploadProfileImage', formData, {
+    const response = await axios.post(`${process.env.VUE_APP_API_URL}/api/uploadProfileImage`, formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

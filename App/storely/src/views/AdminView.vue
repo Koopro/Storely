@@ -11,7 +11,7 @@
       >
         <v-card class="pa-3 d-flex flex-column user-card" elevation="2" outlined>
           <div class="d-flex justify-space-between align-center">
-            <v-avatar :image="`http://localhost:3000${user.profileImageUrl}`" size="80"></v-avatar>
+            <v-avatar :image="`http://45.145.224.59:3000${user.profileImageUrl}`" size="80"></v-avatar>
             <v-chip small :color="roleColor(user.role)" class="ml-3">{{ user.role }}</v-chip>
           </div>
 
@@ -46,7 +46,7 @@ export default {
   async created() {
     const token = localStorage.getItem('authToken');
     try {
-      const response = await axios.get('http://localhost:3000/api/admin/data', {
+      const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/admin/data`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -72,7 +72,7 @@ export default {
   },
 };
 </script>
-
+ 
 <style scoped>
 .user-card {
   display: flex;

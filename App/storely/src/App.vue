@@ -13,6 +13,7 @@ export default {
     this.handleVisibilityChange();
     this.handleWindowClose();
     this.periodicStatusUpdate();
+    this.callUrl();
   },
   methods: {
     handleVisibilityChange() {
@@ -30,7 +31,7 @@ export default {
       window.addEventListener("beforeunload", () => {
         const data = { status: 'offline' };
         const blob = new Blob([JSON.stringify(data)], {type : 'application/json'});
-        navigator.sendBeacon('http://localhost:3000/api/updateStatus', blob);
+        navigator.sendBeacon(`${process.env.VUE_APP_API_URL}/api/updateStatus`, blob);
       });
     },
 
@@ -43,9 +44,8 @@ export default {
       }, 300000); // Update status every 5 minutes
     },
     updateUserStatus(status) {
-      // Implement logic to retrieve the current user's auth token
       const token = localStorage.getItem('authToken');
-      axios.post('http://localhost:3000/api/updateStatus', { status }, {
+      axios.post(`${process.env.VUE_APP_API_URL}/api/updateStatus`, { status }, {
         headers: { 'Authorization': `Bearer ${token}` },
       }).then(() => {
         console.log(`Status updated to ${status}`);
@@ -54,11 +54,14 @@ export default {
       });
     },
     updateUserStatusSync(status) {
-      // Use navigator.sendBeacon for synchronous request when unloading
       const token = localStorage.getItem('authToken');
       const blob = new Blob([JSON.stringify({ status, token })], { type: 'application/json' });
-      navigator.sendBeacon('http://localhost:3000/api/updateStatus', blob);
+      navigator.sendBeacon(`${process.env.VUE_APP_API_URL}/api/updateStatus`, blob);
+    },
+    callUrl() {
+      console.log(`Calling URL... ${process.env.VUE_APP_API_URL}`);
     }
+
   }
 };
 </script>

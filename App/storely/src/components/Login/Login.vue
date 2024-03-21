@@ -138,7 +138,7 @@ export default {
     },
     async submitLoginForm() {
       try {
-        const response = await axios.post('http://localhost:3000/api/login', {
+        const response = await axios.post(`${process.env.VUE_APP_API_URL}/api/login`, {
           email: this.email,
           password: this.password,
         });
@@ -161,7 +161,7 @@ export default {
 
     async submitRegisterForm() {
       try {
-        const response = await axios.post('http://localhost:3000/api/register', {
+        const response = await axios.post(`${process.env.VUE_APP_API_URL}/api/register`,{
           name: this.name,
           lastname: this.lastname,
           username: this.username,

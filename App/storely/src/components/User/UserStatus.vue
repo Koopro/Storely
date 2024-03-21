@@ -32,7 +32,7 @@
       },
       async updateStatus() {
         try {
-            await axios.post('http://localhost:3000/api/updateStatus', { status: this.selectedStatus }, {
+            await axios.post(`${process.env.VUE_APP_API_URL}/api/updateStatus`, { status: this.selectedStatus }, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
             });
             // Emit an event to notify parent component of the status update

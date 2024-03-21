@@ -111,11 +111,11 @@
     methods: {
       async fetchUserProfile() {
         try {
-          const response = await axios.get('http://localhost:3000/api/user/profile', {
+          const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/user/profile`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
           });
           this.user = response.data;
-          this.user.profileImageUrl = `http://localhost:3000${this.user.profileImageUrl}`;
+          this.user.profileImageUrl = `${process.env.VUE_APP_API_URL}${this.user.profileImageUrl}`;
           this.editableName = this.user.name;
           this.editableLastname = this.user.lastname;
           this.editableUsername = this.user.username; // Initialize editableUsername
@@ -143,7 +143,7 @@
         formData.append('username', this.editableUsername); // Add username to the formData
     
         try {
-          await axios.post('http://localhost:3000/api/updateProfile', formData, {
+          await axios.post(`${process.env.VUE_APP_API_URL}//api/updateProfile`, formData, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
               'Content-Type': 'multipart/form-data',
