@@ -61,7 +61,7 @@ export default {
     //Expands the sidebar
     expandSidebar() {
       // Überprüfen, ob die Breite der Sidebar größer als die Einschränkung ist
-      if (window.innerWidth > 500) {
+      if (window.innerWidth > 850) {
         this.isExpanded = true;
   }
     },
