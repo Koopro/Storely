@@ -20,7 +20,15 @@
               <v-list-item-title class="headline mb-1">{{ user.username }}</v-list-item-title>
               <v-list-item-subtitle>Name: {{ user.name }} {{ user.lastname }}</v-list-item-subtitle>
               <v-list-item-subtitle>Email: {{ user.email }}</v-list-item-subtitle>
-              <v-list-item-subtitle>Status: {{ user.status }}</v-list-item-subtitle>
+              
+              <!-- Status with Icon -->
+              <v-list-item-subtitle>
+                Status: {{ user.status }}
+                <v-icon small v-if="user.status === 'online'" color="green">mdi-check-circle</v-icon>
+                <v-icon small v-else-if="user.status === 'offline'" color="red">mdi-close-circle</v-icon>
+                <v-icon small v-else color="orange">mdi-clock-outline</v-icon> <!-- Assuming 'away' status -->
+              </v-list-item-subtitle>
+              
             </v-list-item-content>
           </v-list-item>
 

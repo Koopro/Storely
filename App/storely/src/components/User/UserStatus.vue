@@ -1,9 +1,9 @@
 <template>
-    <div>
-      <img :src="getStatusIcon(user.status)" :alt="user.status" />
-      <v-select v-if="editMode" :items="statuses" v-model="selectedStatus" @change="updateStatus"></v-select>
-    </div>
-  </template>
+  <div>
+    <img v-if="!editMode" :src="getStatusIcon(user.status)" :alt="user.status" />
+    <v-select v-if="editMode" :items="statuses" v-model="selectedStatus" @change="updateStatus" item-text="name" item-value="status"></v-select>
+  </div>
+</template>
   
   <script>
   import axios from 'axios';
@@ -13,15 +13,20 @@
   import AwayIcon from '../../assets/icons/away.svg';
   
   export default {
-    props: ['user', 'editMode'],
-    data() {
-      return {
-        selectedStatus: this.user.status,
-        statuses: ['online', 'offline', 'disturb', 'away'],
-      };
-    },
-    methods: {
-      getStatusIcon(status) {
+  props: ['user', 'editMode'],
+  data() {
+    return {
+      selectedStatus: this.user.status,
+      statuses: [
+        { status: 'online', name: 'Online' },
+        { status: 'offline', name: 'Offline' },
+        { status: 'disturb', name: 'Do Not Disturb' },
+        { status: 'away', name: 'Away' }
+      ],
+    };
+  },
+  methods: {
+    getStatusIcon(status) {
         switch (status) {
           case 'online': return OnlineIcon;
           case 'offline': return OfflineIcon;
