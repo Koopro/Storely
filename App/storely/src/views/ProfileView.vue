@@ -1,4 +1,5 @@
 <template>
+  <Sidebar />
   <v-app :class="{'dark-mode': darkMode}">
     <div class="app-container">
       <sidebar class="app-sidebar" @dark-mode-changed="darkMode = $event"></sidebar>
@@ -15,7 +16,7 @@
 
 <script>
 import { defineComponent } from 'vue';
-import Sidebar from '../components/sidebar/Sidebar.vue'; // Adjust the path as per your project structure
+import Sidebar from '../components/sidebar/Sidebar.vue'; // Importiere die Sidebar-Komponente hier
 import UserProfileCard from '../components/Profile/UserProfileCard.vue'; // Import the UserProfileCard component
 
 export default defineComponent({
