@@ -1,38 +1,24 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const userProfileRoutes = require('./routes/UserProfile');
-// Import MongoClient
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const socketAuthMiddleware = require('./middleware/socketAuthMiddleware');
+const { dbConnectMongoose, dbConnectMongoClient } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Use the second MongoDB URI directly
-const uri2 = process.env.MONGO_URI2;
+// Creating an HTTP server and passing the Express app to it
+const server = require('http').createServer(app);
 
-// Function to create a new MongoClient using uri2
-function createMongoClient(uri) {
-  return new MongoClient(uri, {
-    serverApi: ServerApiVersion.v1,
-  });
-}
-
-// Initial MongoClient using uri2
-let client = createMongoClient(uri2);
-
-async function runMongoClient(client) {
-  try {
-    await client.connect();
-    await client.db("storely").command({ ping: 1 });
-    console.log("Connected successfully to MongoDB using MongoClient with uri2");
-  } catch (err) {
-    console.error("Could not connect to MongoDB using MongoClient with uri2", err);
-  }
-}
+// Passing the server to socket.io
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+  },
+});
 
 // Middleware
 app.use(cors());
@@ -41,12 +27,52 @@ app.use('/api', authRoutes);
 app.use('/api', userProfileRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// MongoDB Connection using Mongoose with uri2
-mongoose.connect(uri2, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('Connected to MongoDB using Mongoose with uri2');
-    runMongoClient(client); // Run MongoClient connection using uri2
-  })
-  .catch(err => console.error('Could not connect to MongoDB using Mongoose with uri2', err));
+// Database Connection
+dbConnectMongoose();
+dbConnectMongoClient();
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+io.use(socketAuthMiddleware)
+
+// Apply the middleware to all incoming Socket.IO connections
+io.on('connection', (socket) => {
+  console.log(`User connected: ${socket.id}, User ID: ${socket.userId}`);
+  
+  // Update user status to 'online' upon connection
+  updateUserStatus(socket.userId, 'online');
+
+  socket.on('disconnect', () => {
+    console.log(`User disconnected: ${socket.id}, User ID: ${socket.userId}`);
+    // Update user status to 'offline' upon disconnection
+    updateUserStatus(socket.userId, 'offline');
+  });
+
+  socket.on('updateStatus', async (status) => {
+    // This allows for manual status updates, e.g., setting to 'away'
+    updateUserStatus(socket.userId, status);
+  });
+}); 
+
+console.log
+
+const User = require('./models/User'); // Adjust the path as necessary
+
+const updateUserStatus = async (userId, status) => {
+  console.log(`Attempting to update user ${userId} to status: ${status}`);
+  try {
+    const result = await User.findByIdAndUpdate(userId, { status: status }, { new: true });
+    console.log(`Update result:`, result);
+  } catch (error) {
+    console.error(`Error updating user ${userId} status to ${status}:`, error);
+  }
+};
+
+
+
+
+
+
+
+
+
+// Use server.listen instead of app.listen to start the server with Socket.IO integration
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
