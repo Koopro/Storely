@@ -16,7 +16,7 @@
             <v-icon :class="'mdi mdi-format-list-checks'"></v-icon>
             <span class="link-name" v-show="isExpanded">TODO</span>
           </router-link>
-          <router-link to="/profile" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
+          <router-link to="/testing2" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
             <v-icon :class="'mdi mdi-account-outline'"></v-icon>
             <span class="link-name" v-show="isExpanded">Profile</span>
           </router-link>
