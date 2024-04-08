@@ -13,7 +13,8 @@ export default {
     return {
       socket: null, // Initialize the socket
       inactivityTimer: null,
-      inactivityTime:  5 * 60 *1000, // 5 minutes
+      inactivityTime: 5 * 60 * 1000, // 5 minutes
+      currentUserStatus: 'offline', // Track the current status of the user
     };
   },
 
@@ -24,22 +25,45 @@ export default {
 
   methods: {
     setupInactivityDetection() {
-      // Resets the inactivity timer
       const resetTimer = () => {
         clearTimeout(this.inactivityTimer);
         this.inactivityTimer = setTimeout(() => {
+          // Update status to 'away' after inactivity
           this.updateUserStatus('away');
         }, this.inactivityTime);
-        // Assuming the user returns and is active, update status back to online
-        this.updateUserStatus('online');
       };
 
-      // Event listeners to reset the timer on user activity
-      document.addEventListener('mousemove', resetTimer);
-      document.addEventListener('keypress', resetTimer);
-      document.addEventListener('visibilitychange', resetTimer);
+      document.addEventListener('mousemove', () => {
+        if (this.currentUserStatus !== 'online') {
+          this.updateUserStatus('online');
+        }
+        resetTimer();
+      });
+
+      document.addEventListener('keypress', () => {
+        if (this.currentUserStatus !== 'online') {
+          this.updateUserStatus('online');
+        }
+        resetTimer();
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && this.currentUserStatus !== 'online') {
+          this.updateUserStatus('online');
+        } else if (document.visibilityState === 'hidden') {
+          resetTimer(); // May eventually set the status to 'away'
+        }
+      });
 
       resetTimer(); // Initialize the timer
+    },
+
+    updateUserStatus(status) {
+      if (this.socket && this.currentUserStatus !== status) {
+        this.socket.emit('updateStatus', status);
+        console.log(`Status updated to ${status}`);
+        this.currentUserStatus = status; // Update the current status
+      }
     },
 
     initializeSocket() {
@@ -47,23 +71,14 @@ export default {
         query: {
           token: localStorage.getItem('authToken'),
         },
-      }); // Initialize Socket.IO client
+      });
 
       this.socket.on("connect", () => {
         console.log(`Connected to server with socket ID: ${this.socket.id}`);
+        // Ensure the user is marked online upon connecting
+        this.updateUserStatus('online');
       });
-
-      // Additional logic...
     },
-
-    updateUserStatus(status) {
-      if (this.socket) {
-        this.socket.emit('updateStatus', status);
-        console.log(`Status updated to ${status}`);
-      }
-    },
-
-    // Additional methods...
   },
 
   beforeUnmount() {
@@ -72,8 +87,7 @@ export default {
     }
     clearTimeout(this.inactivityTimer); // Clean up the timer when component unmounts
   },
-}
-
+};
 </script>
 
 <style>

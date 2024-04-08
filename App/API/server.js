@@ -6,6 +6,8 @@ const authRoutes = require('./routes/authRoutes');
 const userProfileRoutes = require('./routes/UserProfile');
 const socketAuthMiddleware = require('./middleware/socketAuthMiddleware');
 const { dbConnectMongoose, dbConnectMongoClient } = require('./db');
+const { updateUserStatus } = require('./utils/userStatus'); // Adjust the path as necessary
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +29,9 @@ app.use('/api', authRoutes);
 app.use('/api', userProfileRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.use(express.static(path.join(__dirname, 'public')));
+
+
 // Database Connection
 dbConnectMongoose();
 dbConnectMongoClient();
@@ -38,41 +43,19 @@ io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}, User ID: ${socket.userId}`);
   
   // Update user status to 'online' upon connection
-  updateUserStatus(socket.userId, 'online');
+  updateUserStatus(socket.userId, 'online').catch(err => console.error(err));
 
   socket.on('disconnect', () => {
     console.log(`User disconnected: ${socket.id}, User ID: ${socket.userId}`);
     // Update user status to 'offline' upon disconnection
-    updateUserStatus(socket.userId, 'offline');
+    updateUserStatus(socket.userId, 'offline').catch(err => console.error(err));
   });
 
-  socket.on('updateStatus', async (status) => {
+  socket.on('updateStatus', (status) => {
     // This allows for manual status updates, e.g., setting to 'away'
-    updateUserStatus(socket.userId, status);
+    updateUserStatus(socket.userId, status).catch(err => console.error(err));
   });
-}); 
-
-console.log
-
-const User = require('./models/User'); // Adjust the path as necessary
-
-const updateUserStatus = async (userId, status) => {
-  console.log(`Attempting to update user ${userId} to status: ${status}`);
-  try {
-    const result = await User.findByIdAndUpdate(userId, { status: status }, { new: true });
-    console.log(`Update result:`, result);
-  } catch (error) {
-    console.error(`Error updating user ${userId} status to ${status}:`, error);
-  }
-};
-
-
-
-
-
-
-
-
+});
 
 // Use server.listen instead of app.listen to start the server with Socket.IO integration
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
