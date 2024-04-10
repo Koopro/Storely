@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="sidebar" :class="{ expanded: isExpanded }" @mouseover="expandSidebar" @mouseleave="collapseSidebar">
+    <div class="sidebar" :class="{ expanded: isExpanded, dark: darkMode }" @mouseover="expandSidebar" @mouseleave="collapseSidebar">
       <div class="sidebar-content">
         <!-- Top Links -->
         <div class="top-links" :style="{ justifyContent: isExpanded ? 'flex-start' : 'center' }">
@@ -23,7 +23,7 @@
         </div>
         <!-- Dark Mode Toggle Button -->
         <div class="dark-mode-toggle-container">
-          <dark-mode-toggle :value="darkMode" @change="toggleDarkMode" :style="{ color: darkMode ? '#fff' : '#000', backgroundColor: darkMode ? '#323232' : '#BBBBBB', display: 'block' }" />
+          <dark-mode-toggle :value="darkMode" @change="toggleDarkMode" />
         </div>
         <!-- Spacer -->
         <div class="spacer"></div>
@@ -47,32 +47,20 @@ export default {
     };
   },
   created() {
-    this.darkMode = localStorage.getItem('darkMode') === 'true'; // Initialisieren mit dem Wert aus dem Local Storage
-    this.updateBackgroundColor(); // Hintergrundfarbe aktualisieren
+    this.darkMode = localStorage.getItem('darkMode') === 'true';
   },
   methods: {
     toggleDarkMode(value) {
       this.darkMode = value;
-      localStorage.setItem('darkMode', value); // Speichern des Dark Mode-Werts im Local Storage
-      this.updateBackgroundColor(); // Hintergrundfarbe aktualisieren
+      localStorage.setItem('darkMode', value);
     },
-
-    //Expands the sidebar
     expandSidebar() {
-      // Überprüfen, ob die Breite der Sidebar größer als die Einschränkung ist
       if (window.innerWidth > 500) {
         this.isExpanded = true;
-  }
+      }
     },
-
-    // Collapse the sidebar by setting isExpanded to false.
     collapseSidebar() {
       this.isExpanded = false;
-    },
-
-    // Hintergrundfarbe der Sidebar aktualisieren basierend auf dem Dark-Mode-Zustand
-    updateBackgroundColor() {
-      document.documentElement.style.backgroundColor = this.darkMode ? '#323232' : '#BBBBBB';
     }
   }
 };
@@ -86,21 +74,22 @@ export default {
   bottom: 0;
   width: 62px;
   padding: 20px;
-  overflow: hidden; /* Verhindert Scrollen */
+  overflow: hidden;
   z-index: 1000;
   transition: width 0.3s;
   border-right: #555 1px solid;
-  border-radius: 5rem;
+  border-radius: 0% 2rem 2rem 0%;
+  background-color: #fff; /* Standard-Hintergrundfarbe */
 }
 
-.expanded {
-  width: 150px;
+.dark {
+  background-color: #323232; /* Hintergrundfarbe im Dark Mode */
 }
 
 .sidebar-content {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* 100% Höhe des Viewports */
+  height: 100vh;
 }
 
 .top-links {
@@ -108,26 +97,33 @@ export default {
   flex-direction: column;
 }
 
-.bottom-links {
-  margin-top: auto;
-}
-
 .sidebar-link {
   text-decoration: none;
   padding: 10px 0;
   border-bottom: 1px solid #555;
+  display: flex;
+  align-items: center;
 }
 
 .sidebar-link:hover .link-name {
-  display: inline-block;
+  visibility: visible;
+  margin-left: 20px;
+}
+
+.sidebar:hover, .sidebar.expanded {
+  width: 155px;
+  transition: width 0.5s ease;
+}
+
+.link-name {
   margin-left: 10px;
 }
 
 .dark-mode-toggle-container {
   position: absolute;
-  bottom: 20px; /* Anpassen der unteren Position */
-  left: 50%; /* Zentrieren des Buttons */
+  bottom: 20px;
+  left: 50%;
   transform: translateX(-50%);
-  z-index: 1; /* sicherstellen, dass der Dark-Mode-Toggle über der Sidebar liegt */
+  z-index: 1;
 }
 </style>
