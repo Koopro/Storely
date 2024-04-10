@@ -7,6 +7,7 @@ import VerifyEmail from '../components/EmailVerification.vue';
 import TestView2 from '../views/TestView2.vue';
 import TestView3 from '../views/TestView3.vue';
 import TestView4 from '../views/TestView4.vue';
+import TestView5 from '../views/TestView5.vue';
 import AdminView from '../views/AdminView.vue';
 
 const routes = [
@@ -54,6 +55,11 @@ const routes = [
     path: '/testing4',
     name: 'testing4',
     component: TestView4,
+  },
+  {
+  path: '/testing5',
+    name: 'testing5',
+    component: TestView5,
   },
   {
     path: '/admin',
