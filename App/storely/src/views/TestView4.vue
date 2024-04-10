@@ -92,10 +92,7 @@
     border-right: #555 1px solid;
     border-radius: 5rem;
   }
-  
-  .expanded {
-    width: 150px;
-  }
+
   
   .sidebar-content {
     display: flex;
@@ -116,22 +113,27 @@
     text-decoration: none;
     padding: 10px 0;
     border-bottom: 1px solid #555;
+    display: flex;
+    align-items: center;
   }
   
   .sidebar-link:hover .link-name {
-    display: inline-block;
-    margin-left: 10px;
-  }
+  opacity: 1;
+  visibility: visible;
+  margin-left: 20px;
+}
+
+.sidebar:hover, .sidebar.expanded {
+  width: 155px; /* Oder die gewünschte Breite der erweiterten Sidebar */
+  transition: width 0.5s ease; /* Gleiche Dauer wie die Übergänge der Link-Namen für Konsistenz */
+}
 
   .link-name {
-    margin-left: 20px;
-    animation-name: fadeIn; /* Name der Animation */
-    animation-duration: 1s; /* Dauer der Animation */
-    animation-delay: 0.1s; /* Verzögerung vor dem Start der Animation */
-    animation-fill-mode: forwards; /* Behält den letzten Zustand der Animation bei */
-    opacity: 0; /* Text zu Beginn unsichtbar machen */
+  margin-left: 10px;
   }
   
+
+
   .dark-mode-toggle-container {
     position: absolute;
     bottom: 20px; /* Anpassen der unteren Position */
@@ -140,12 +142,5 @@
     z-index: 1; /* sicherstellen, dass der Dark-Mode-Toggle über der Sidebar liegt */
   }
 
-  @keyframes fadeIn {
-    from {
-        opacity: 0; /* Startzustand der Animation (unsichtbar) */
-    }
-    to {
-        opacity: 1; /* Endzustand der Animation (sichtbar) */
-    }
-}
+  
   </style>
