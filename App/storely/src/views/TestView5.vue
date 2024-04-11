@@ -30,7 +30,7 @@
             <v-card class="chat-card">
               <v-card-title class="text-h5">Chat</v-card-title>
               <v-card-text>
-                <!-- Chat content here -->
+                <Chat />
               </v-card-text>
             </v-card>
           </v-col>
@@ -42,10 +42,12 @@
   
   <script>
   import Sidebar from '../components/sidebar/Sidebar.vue';
+  import Chat from '../components/TestComponents/ChatComponent.vue';
   
   export default {
     components: {
       Sidebar,
+      Chat,
     },
   };
   </script>
