@@ -22,7 +22,10 @@
           </router-link>
         </div>
         <!-- Dark Mode Toggle Button -->
-        <div class="dark-mode-toggle-container">
+        <div v-if="isExpanded === false" class="dark-mode-toggle-container">
+          <dark-mode-toggle :value="darkMode" @change="toggleDarkMode" />
+        </div>
+        <div v-else class="dark-mode-toggle-container2">
           <dark-mode-toggle :value="darkMode" @change="toggleDarkMode" />
         </div>
         <!-- Spacer -->
@@ -122,8 +125,19 @@ export default {
 .dark-mode-toggle-container {
   position: absolute;
   bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1;
+  display: flex;
+  left: 5%;
+  z-index: 999;
+  transition: ease-in 2s;
 }
+
+.dark-mode-toggle-container2 {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translate(-50%);
+  z-index: 999;
+  transition: ease-out 2s;
+}
+
 </style>
