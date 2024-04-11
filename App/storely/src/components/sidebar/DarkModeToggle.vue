@@ -42,6 +42,7 @@ export default {
 </script>
 
 <style scoped>
+
 .dark-mode-toggle {
   display: flex;
   align-items: center;
