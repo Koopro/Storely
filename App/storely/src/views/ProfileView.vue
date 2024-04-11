@@ -82,8 +82,8 @@ export default {
 -->
 
 <template>
-  <Sidebar></Sidebar>
-  <UserCard />
+    <Sidebar></Sidebar>
+    <UserCard />
 </template>
 
 <script>
@@ -98,4 +98,9 @@ export default {
 }
 </script>
 
+<style>
+  template {
+    background-color: pink;
+  }
+</style>
 

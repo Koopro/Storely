@@ -1,7 +1,9 @@
 <template>
-  <div id="app">
-    <router-view />
-  </div>
+  <v-app :class="{'dark-mode': darkMode}">
+    <div id="app">
+      <router-view />
+    </div>
+  </v-app>
 </template>
 
 <script>
@@ -15,15 +17,29 @@ export default {
       inactivityTimer: null,
       inactivityTime: 5 * 60 * 1000, // 5 minutes
       currentUserStatus: 'offline', // Track the current status of the user
+      darkMode: false,
+      darkModeCheckInterval: null,
     };
   },
 
   mounted() {
     this.initializeSocket();
     this.setupInactivityDetection();
+    this.checkDarkMode();
+    this.darkModeCheckInterval = setInterval(this.checkDarkMode, 1);
   },
-
+  beforeUnmount() {
+    // Clean up the event listener when the component is destroyed
+    clearInterval(this.darkModeCheckInterval);
+  },
   methods: {
+    checkDarkMode() {
+    const storedDarkMode = localStorage.getItem('darkMode');
+    const currentDarkMode = storedDarkMode ? JSON.parse(storedDarkMode) : false;
+    if (this.darkMode !== currentDarkMode) {
+      this.darkMode = currentDarkMode;
+    }
+  },
     setupInactivityDetection() {
       const resetTimer = () => {
         clearTimeout(this.inactivityTimer);
@@ -91,5 +107,21 @@ export default {
 </script>
 
 <style>
-/* Your styles */
+/* Light mode background */
+#app {
+  background-color: #f5f5f5; /* Light grey for light mode */
+  color: #212121; /* Dark grey for text in light mode */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+  height: 100%;
+  width: 100%;
+}
+
+/* Dark mode background */
+.dark-mode #app {
+  background-color: #212121; /* Dark grey for dark mode */
+  color: #e0e0e0; /* Light grey for text in dark mode */
+  height: 100%;
+  width: 100%;
+}
 </style>
+
