@@ -8,6 +8,7 @@ import TestView2 from '../views/TestView2.vue';
 import TestView3 from '../views/TestView3.vue';
 import TestView4 from '../views/TestView4.vue';
 import TestView5 from '../views/TestView5.vue';
+import TestView6 from '../views/TestView6.vue';
 import AdminView from '../views/AdminView.vue';
 
 const routes = [
@@ -60,6 +61,11 @@ const routes = [
   path: '/testing5',
     name: 'testing5',
     component: TestView5,
+  },
+  {
+    path: '/testing6',
+    name: 'testing6',
+    component: TestView6,
   },
   {
     path: '/admin',
