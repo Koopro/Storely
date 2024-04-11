@@ -42,6 +42,7 @@ export default {
 </script>
 
 <style scoped>
+
 .mdi-white-balance-sunny {
   color: #ffffff;
 }

@@ -11,7 +11,7 @@
       >
         <v-card class="pa-3 d-flex flex-column user-card" elevation="2" outlined>
           <div class="d-flex justify-space-between align-center">
-            <v-avatar :image="`http://45.145.224.59:3000${user.profileImageUrl}`" size="80"></v-avatar>
+            <v-avatar :image="`https://api.storely.at${user.profileImageUrl}`" size="80"></v-avatar>
             <v-chip small :color="roleColor(user.role)" class="ml-3">{{ user.role }}</v-chip>
           </div>
 

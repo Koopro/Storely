@@ -113,13 +113,15 @@ router.post(
   upload.single("profileImage"),
   async (req, res) => {
     try {
-      const { name, lastname } = req.body;
+      const { name, lastname, username } = req.body;
       const user = await User.findById(req.userData.userId);
       if (!user) return res.status(404).json({ message: "User not found." });
 
       // Update fields
       if (name) user.name = name;
       if (lastname) user.lastname = lastname;
+      if (username) user.username = username;
+
 
       // Update image if provided
       if (req.file) {

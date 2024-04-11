@@ -22,11 +22,6 @@ const apiKeyMiddleware = async (req, res, next) => {
       return res.status(403).json({ message: 'API key expired' });
     }
     
-    // Optional: attach relevant data from the apiKeyDocument to the request
-    // req.apiKeyData = {
-    //   // Any relevant data you want to pass along
-    // };
-
     console.log('API key is valid. Proceeding...');
     next();
   } catch (error) {
