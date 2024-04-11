@@ -1,6 +1,6 @@
-  <template>
+<!--  <template>
     <div>
-      <!-- Sidebar component -->
+
       <Sidebar />
       <v-container>
         <v-row justify="center">
@@ -9,7 +9,7 @@
               <v-card-title class="text-h5">Profil</v-card-title>
               <v-divider></v-divider>
               <v-card-text>
-                <!-- Profilbild -->
+
                 <div class="profile-picture-container">
                   <img :src="tempUser.profileImageUrl || user.profileImageUrl || defaultProfileImage" class="profile-picture" alt="Profilbild">
                   <label for="profile-image-input" class="change-profile-button">
@@ -17,13 +17,11 @@
                   </label>
                   <input id="profile-image-input" type="file" @change="onFileChange" accept="image/*" style="display: none;">
                 </div>
-                <!-- Benutzername -->
                 <div>
                   <label>Benutzername:&nbsp</label>
                   <span v-if="!editing">{{ user.username }}</span>
                   <input v-else type="text" v-model="tempUser.username" :class="{ 'edit-mode-input': editing }" required>
                 </div>
-                <!-- Button-Container -->
                 <div class="button-container">
                   <button @click="toggleEditing" class="edit-mode-button">{{ editing ? 'Speichern' : 'Bearbeiten' }}</button>
                   <button v-if="editing" @click="cancelEdit" class="edit-mode-button">Abbrechen</button>
@@ -178,3 +176,21 @@
     color: red; /* Rote Farbe für Fehlermeldungen */
   }
   </style>
+-->
+<template>
+  <Sidebar></Sidebar>
+  <UserCard />
+</template>
+
+<script>
+import Sidebar from '../components/sidebar/Sidebar.vue';
+import UserCard from '../components/User/UserCard.vue';
+
+export default {
+  components: {
+    UserCard,
+    Sidebar
+  },
+}
+</script>
+

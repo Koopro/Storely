@@ -1,5 +1,6 @@
-<template>
+<!--<template>
   <Sidebar />
+  <UserCard />
   <v-app :class="{'dark-mode': darkMode}">
     <div class="app-container">
       <sidebar class="app-sidebar" @dark-mode-changed="darkMode = $event"></sidebar>
@@ -10,33 +11,26 @@
       </div>
     </div>
   </v-app>
+
 </template>
 
-
-
 <script>
-import { defineComponent } from 'vue';
-import Sidebar from '../components/sidebar/Sidebar.vue'; // Importiere die Sidebar-Komponente hier
-import UserProfileCard from '../components/Profile/UserProfileCard.vue'; // Import the UserProfileCard component
+import Sidebar from '../components/sidebar/Sidebar.vue';
+import UserCard from '../components/User/UserCard.vue';
 
-export default defineComponent({
-  name: 'ProfileView',
+export default {
   components: {
-    Sidebar,
-    UserProfileCard // Register the component
+    UserCard,
+    Sidebar
   },
-  data() {
-    return {
-      darkMode: false
-    };
-  }
-});
+}
 </script>
 
 <style scoped>
 .app-container {
   display: grid;
-  grid-template-columns: 250px 1fr; /* Sidebar width is 250px and the rest is for content */
+  grid-template-columns: 250px 1fr;
+  /* Sidebar width is 250px and the rest is for content */
   min-height: 100vh;
 }
 
@@ -47,7 +41,8 @@ export default defineComponent({
 
 .app-content {
   /* Content specific styles here */
-  padding: 60px; /* Adjust padding as needed */
+  padding: 60px;
+  /* Adjust padding as needed */
 }
 
 /* Dark mode styles */
@@ -67,7 +62,8 @@ export default defineComponent({
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .app-container {
-    grid-template-columns: 1fr; /* Stack sidebar and content on smaller screens */
+    grid-template-columns: 1fr;
+    /* Stack sidebar and content on smaller screens */
   }
 
   .app-sidebar {
@@ -75,12 +71,31 @@ export default defineComponent({
   }
 
   .app-content {
-    padding: 10px; /* Adjust padding as needed for smaller screens */
+    padding: 10px;
+    /* Adjust padding as needed for smaller screens */
   }
 }
 
 /* Additional dark mode or specific styles can go here */
-</style>
 
+</style>
+-->
+
+<template>
+  <Sidebar></Sidebar>
+  <UserCard />
+</template>
+
+<script>
+import Sidebar from '../components/sidebar/Sidebar.vue';
+import UserCard from '../components/User/UserCard.vue';
+
+export default {
+  components: {
+    UserCard,
+    Sidebar
+  },
+}
+</script>
 
 
