@@ -8,6 +8,8 @@ const { sendVerificationEmail } = require('./services/emailService');
 const adminMiddleware = require('../middleware/adminMiddleware'); // Adjust path as necessary
 const authMiddleware = require('../middleware/authMiddleware');
 
+const { listAllUsers } = require('../controllers/userController');
+
 // Registration
 router.post('/register', async (req, res) => {
   try {
@@ -93,8 +95,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-module.exports = router;
-
 router.get('/admin/data', [authMiddleware, adminMiddleware], async (req, res) => {
   try {
     const users = await User.find({}).select("-password"); // Fetch all users excluding their passwords
@@ -105,6 +105,8 @@ router.get('/admin/data', [authMiddleware, adminMiddleware], async (req, res) =>
     res.status(500).send('Internal Server Error');
   }
 });
+
+router.get('/users', authMiddleware, listAllUsers);
 
 
 

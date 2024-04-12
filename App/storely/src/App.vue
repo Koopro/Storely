@@ -29,8 +29,12 @@ export default {
     this.darkModeCheckInterval = setInterval(this.checkDarkMode, 1);
   },
   beforeUnmount() {
-    // Clean up the event listener when the component is destroyed
     clearInterval(this.darkModeCheckInterval);
+
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+    clearTimeout(this.inactivityTimer);
   },
   methods: {
     checkDarkMode() {
@@ -95,13 +99,6 @@ export default {
         this.updateUserStatus('online');
       });
     },
-  },
-
-  beforeUnmount() {
-    if (this.socket) {
-      this.socket.disconnect();
-    }
-    clearTimeout(this.inactivityTimer); // Clean up the timer when component unmounts
   },
 };
 </script>

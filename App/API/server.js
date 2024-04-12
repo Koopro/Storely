@@ -9,6 +9,7 @@ const { dbConnectMongoose, dbConnectMongoClient } = require("./db");
 const { updateUserStatus } = require("./utils/userStatus"); // Adjust the path as necessary
 //const genSiteRoutes = require('./genSite'); // Adjust the path as needed
 //const apiKeyMiddleware = require('./middleware/apiKeyMiddleware');
+const friendRoutes = require('./routes/friendRoutes');
 
 
 const app = express();
@@ -32,6 +33,9 @@ app.use(express.json());
 //app.use('/gen', genSiteRoutes);
 app.use("/api", authRoutes);
 app.use("/api", userProfileRoutes);
+app.use("/api/friends", friendRoutes);
+
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(express.static(path.join(__dirname, "public")));
