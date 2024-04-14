@@ -1,16 +1,15 @@
 <template>
   <Sidebar @click="handleDarkMode" />
   <div class="top" :class="{ 'dark-top': isDarkMode }">
-    <Clock class="clock"/>
-    <h1 class="Timer" :class="{ 'Timer-dark': isDarkMode }">{{ time }}</h1>
+    <Clock class="clock" :class="{ 'clock-dark': isDarkMode }"/>
   </div>
   <div class="menu" :class="{ 'dark-menu': isDarkMode }">
     <div class="inner-menu">
       <ul>
         <!-- Automatisch Listenpunkte generieren basierend auf verfügbaren Listen -->
-        <li v-for="list in lists" :key="list._id" :class="{ 'dark-list': isDarkMode }">
+        <li v-for="list in lists" :key="list._id" :style="{ backgroundColor: list.color }" :class="{ 'dark-list': isDarkMode }">
           {{ list.name }}
-          <i class="fas fa-trash" @click="deleteList(list._id)"></i>
+          <i class="fas fa-trash" @click="promptDelete(list._id, list.password)"></i>
         </li>
       </ul>
     </div>
@@ -21,36 +20,36 @@
     <div class="popup-add-list" :class="{ 'popup-add-list-DARK': isDarkMode }">
       <h1 class="popup-add-list-header">Wie soll die neue Liste heißen?</h1>
       <input type="text" class="popup-add-list-input" placeholder="Listenname" ref="listNameInput" :class="{ 'popup-add-list-input-DARK': isDarkMode }">
-      <button class="popup-add-list-button" :class="{ 'popup-add-list-button-DARK': isDarkMode }" @click="addList">Hinzufügen</button>
+      <input type="text" class="popup-add-list-password" placeholder="Passwort" v-model="listPassword" ref="listPasswordInput" :class="{ 'popup-add-list-input-DARK': isDarkMode }">
+      <input type="color" class="popup-add-list-color" v-model="listColor">
+    <button class="popup-add-list-button" :class="{ 'popup-add-list-button-DARK': isDarkMode }" @click="addList">Hinzufügen</button>
     </div>
   </div>
   <div class="popup-background" :class="{ 'popup-background-DARK': isDarkMode }"></div>
-  <v-icon :class="'mdi mdi-account-outline'"></v-icon>
 </template>
 
 <script>
 import axios from 'axios';
 import Sidebar from '../sidebar/Sidebar.vue';
+import Clock from './Clock.vue';
 
 export default {
   components: {
-    Sidebar
+    Sidebar, 
+    Clock
   },
   data() {
-    return {
-      isDarkMode: false,
-      lists: [],  // Speicherung aller Listen in einem Array
-      time: this.getTime()
-    };
-  },
+  return {
+    isDarkMode: false,
+    lists: [],
+    listPassword: '',  // Speichern des Passworts für die Liste
+    listColor: '#ffffff'  // Standardfarbe, falls keine gewählt wird
+  };
+},
+
   created() {
     this.handleDarkMode();
     this.fetchLists();
-  },
-  mounted() {
-    setInterval(() => {
-      this.time = this.getTime();
-    }, 1000);
   },
   methods: {
     // Dark Mode
@@ -69,19 +68,28 @@ export default {
     },
     async addList() {
       const listName = this.$refs.listNameInput.value.trim();
-      if (listName === "") {
-        alert("Bitte gib einen Listennamen ein.");
+      const listPassword = this.listPassword.trim();
+      const listColor = this.listColor;
+      if (listName === "" || listPassword === "") {
+        alert("Bitte gib einen Listennamen und Passwort ein.");
       } else {
         try {
-          const response = await axios.post('http://localhost:3000/lists', { name: listName });
+          const response = await axios.post('http://localhost:3000/lists', {
+            name: listName,
+            password: listPassword,
+            color: listColor
+          });
           this.lists.push(response.data);
           this.$refs.listNameInput.value = "";
+          this.listPassword = "";  // Reset
+          this.listColor = "#ffffff";  // Reset auf Standardfarbe
           this.closePopup();
         } catch (error) {
           this.handleError(error.message);
         }
       }
     },
+
     async fetchLists() {
       try {
         const response = await axios.get('http://localhost:3000/lists');
@@ -90,6 +98,16 @@ export default {
         this.handleError(error.message);
       }
     },
+
+    promptDelete(listId, expectedPassword) {
+      const password = prompt("Bitte geben Sie das Passwort für diese Liste ein:");
+      if (password === expectedPassword) {
+        this.deleteList(listId);
+      } else {
+        alert("Falsches Passwort, Liste wurde nicht gelöscht.");
+      }
+    },
+
     async deleteList(listId) {
       try {
         await axios.delete(`http://localhost:3000/lists/${listId}`);
@@ -103,16 +121,6 @@ export default {
       document.querySelector('.popup-background').style.display = 'none';
     },
     // Clock
-    getTime() {
-      const now = new Date();
-      const hours = this.padZero(now.getHours());
-      const minutes = this.padZero(now.getMinutes());
-      const seconds = this.padZero(now.getSeconds());
-      return `${hours}:${minutes}:${seconds}`;
-    },
-    padZero(value) {
-      return value < 10 ? '0' + value : value;
-    }
   }
 };
 </script>
@@ -224,7 +232,7 @@ export default {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    height: 20%;
+    height: 30%;
     width: 30%;
     background-color: #aeaeae;
     border-radius: 10px;
@@ -265,8 +273,20 @@ export default {
   
   .popup-add-list-input {
     position: absolute;
-    top: 50%;
-    transform: translate(0,-50%);
+    top: 40%;
+    /* Den Input Text nach rechts verschieben */
+    padding-left: 10px;
+    margin-right: 10%;
+    width: 80%;
+    height: 30px;
+    border-radius: 7px;
+    border: 3px solid rgb(0, 0, 0);
+    background-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .popup-add-list-password {
+    position: absolute;
+    top: 60%;
     /* Den Input Text nach rechts verschieben */
     padding-left: 10px;
     width: 90%;
@@ -276,11 +296,22 @@ export default {
     background-color: rgba(255, 255, 255, 0.4);
   }
 
+
   .popup-add-list-input-DARK {
     border: 2px solid #ffffff;
     color: white;
     background-color: rgba(126, 126, 126, 0.4);
   }
+
+  .popup-add-list-color {
+    position: absolute;
+    margin: 0;
+    top: 40%;
+    right: 10px;
+    height: 30px;
+    width: 10%;
+  }
+
 
   ul {
     list-style-type: none;
@@ -299,30 +330,17 @@ export default {
   margin-bottom: 10px; /* Distance between li elements */
   }
 
-
-
   li i.fas.fa-trash {
     color: red; /* Farbe des Mülleimer-Icons */
     cursor: pointer;
   }
-
-  .Timer {
-    width: auto;
-    height: auto;
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    flex-wrap: nowrap;
-    right: 20px;
-    top: 50%;
-    transform: translate(0, -50%);
+  
+  .clock {
     color: rgb(255, 255, 255);
   }
 
-  .Timer-dark {
+  .clock-dark {
     color: rgb(157, 157, 157)
   }
-  
-  </style>
-  
+
+</style>

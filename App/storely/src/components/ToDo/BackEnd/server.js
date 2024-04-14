@@ -14,17 +14,18 @@ mongoose.connect('mongodb://localhost:27017/Storely', {
 
 app.post('/lists', async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).send({ message: 'Name is required' });
+    const { name, password, color } = req.body;
+    if (!name || !password) {
+      return res.status(400).send({ message: 'Name and password are required' });
     }
-    const newList = new List({ name });
+    const newList = new List({ name, password, color });
     await newList.save();
     res.status(201).send(newList);
   } catch (error) {
     res.status(500).send({ message: 'Server error', error: error.message });
   }
 });
+
 
 
 app.get('/lists', async (req, res) => {

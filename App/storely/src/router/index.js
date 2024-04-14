@@ -4,11 +4,11 @@ import ProfileView from '../views/ProfileView.vue';
 import LoginView from '../views/LoginView.vue';
 import TestView from '../views/TestView.vue';
 import VerifyEmail from '../components/EmailVerification.vue';
+import ToDoView from '../components/ToDo/ToDoView.vue';
 import TestView2 from '../views/TestView2.vue';
 import TestView3 from '../views/TestView3.vue';
 import TestView4 from '../views/TestView4.vue';
 import TestView5 from '../views/TestView5.vue';
-import TestView6 from '../components/ToDo/TestView6.vue';
 import TestView7 from '../views/TestView7.vue';
 import AdminView from '../views/AdminView.vue';
 
@@ -27,6 +27,11 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: ProfileView,
+  },
+  {
+    path: '/todo',
+    name: 'todo',
+    component: ToDoView,
   },
   {
     path: '/testing',
@@ -62,11 +67,6 @@ const routes = [
   path: '/testing5',
     name: 'testing5',
     component: TestView5,
-  },
-  {
-    path: '/testing6',
-    name: 'testing6',
-    component: TestView6,
   },
   {
   path: '/testing7',
