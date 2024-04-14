@@ -8,7 +8,7 @@ import TestView2 from '../views/TestView2.vue';
 import TestView3 from '../views/TestView3.vue';
 import TestView4 from '../views/TestView4.vue';
 import TestView5 from '../views/TestView5.vue';
-import TestView6 from '../views/TestView6.vue';
+import TestView6 from '../components/ToDo/TestView6.vue';
 import TestView7 from '../views/TestView7.vue';
 import AdminView from '../views/AdminView.vue';
 
