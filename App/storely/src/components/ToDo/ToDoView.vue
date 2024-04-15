@@ -78,14 +78,14 @@ export default {
       } else {
         try {
           const response = await axios.post(`${this.apiUrl}/todo/lists`, {
-            method: 'POST',
-            headers: { 'Authorization': this.authToken },
-          },
-          {
             name: listName,
             password: listPassword,
             color: listColor
+          }, {
+            method:'POST',
+            headers: { 'Authorization': this.authToken }
           });
+
           this.lists.push(response.data);
           this.$refs.listNameInput.value = "";
           this.listPassword = "";  // Reset
@@ -121,12 +121,12 @@ export default {
     async deleteList(listId) {
       try {
         await axios.delete(`${this.apiUrl}/todo/lists/${listId}`,{
-          method: 'DELETE',
           headers: {'Authorization': this.authToken},
         });
         this.lists = this.lists.filter(list => list._id !== listId);
       } catch (error) {
         this.handleError(error.message);
+        console.log(error)
       }
     },
     closePopup() {
