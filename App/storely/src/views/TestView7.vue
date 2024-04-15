@@ -9,7 +9,7 @@
           <v-col>
             <v-card class="chat-card">
               <v-card-title class="text-h5">Chat</v-card-title>
-              <v-card-text>
+              <v-card-text class="suptitle1">You can add Friends in your profile settings
                 <Chat />
               </v-card-text>
             </v-card>
@@ -32,5 +32,7 @@
 </script>
 
 <style scoped>
-
+.suptitle1 {
+  font-weight: bold;
+}
 </style>
