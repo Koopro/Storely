@@ -11,8 +11,14 @@ const listSchema = new mongoose.Schema({
   },
   color: {
     type: String,
-    required: false // Dieses Feld ist optional.
+    required: false
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
+
 });
 
 const List = mongoose.model('List', listSchema);
