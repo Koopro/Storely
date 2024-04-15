@@ -81,17 +81,6 @@
           user.name.toLowerCase().includes(this.searchQuery.toLowerCase()) && !this.isFriend(user)
         );
       },
-      sendFriendRequest(user) {
-        this.friendRequestsSent.push(user.id); // Füge den Benutzer zur Liste der gesendeten Freundschaftsanfragen hinzu
-        // Hier könntest du die Logik implementieren, um eine Freundschaftsanfrage an den ausgewählten Benutzer zu senden
-        console.log('Freundschaftsanfrage an ' + user.name + ' gesendet.');
-      },
-      isFriendRequestSent(user) {
-        return this.friendRequestsSent.includes(user.id); // Überprüfe, ob eine Freundschaftsanfrage an den Benutzer gesendet wurde
-      },
-      isFriend(user) {
-        return this.friends.some(friend => friend.id === user.id); // Überprüfe, ob der Benutzer bereits ein Freund ist
-      }
     }
   };
   </script>
@@ -127,7 +116,7 @@
     display: flex;
     flex-direction: column;
   }
-  
+
   .chat-messages {
     overflow-y: auto;
     padding: 10px;
