@@ -1,4 +1,4 @@
-<template>
+  <template>
   <Sidebar @click="handleDarkMode" />
   <div class="top" :class="{ 'dark-top': isDarkMode }">
     <Clock class="clock" :class="{ 'clock-dark': isDarkMode }"/>
@@ -43,7 +43,10 @@ export default {
     isDarkMode: false,
     lists: [],
     listPassword: '',  // Speichern des Passworts für die Liste
-    listColor: '#ffffff'  // Standardfarbe, falls keine gewählt wird
+    listColor: '#ffffff',  // Standardfarbe, falls keine gewählt wird
+    authToken: `Bearer ${localStorage.getItem('authToken')}`,
+    apiUrl: `${process.env.VUE_APP_API_URL}/api`
+
   };
 },
 
@@ -74,7 +77,11 @@ export default {
         alert("Bitte gib einen Listennamen und Passwort ein.");
       } else {
         try {
-          const response = await axios.post('http://localhost:3000/lists', {
+          const response = await axios.post(`${this.apiUrl}/todo/lists`, {
+            method: 'POST',
+            headers: { 'Authorization': this.authToken },
+          },
+          {
             name: listName,
             password: listPassword,
             color: listColor
@@ -92,7 +99,10 @@ export default {
 
     async fetchLists() {
       try {
-        const response = await axios.get('http://localhost:3000/lists');
+        const response = await axios.get(`${this.apiUrl}/todo/lists` ,{
+          method: 'GET',
+          headers: {'Authorization': this.authToken},
+        });
         this.lists = response.data;
       } catch (error) {
         this.handleError(error.message);
@@ -110,7 +120,10 @@ export default {
 
     async deleteList(listId) {
       try {
-        await axios.delete(`http://localhost:3000/lists/${listId}`);
+        await axios.delete(`${this.apiUrl}/todo/lists/${listId}`,{
+          method: 'DELETE',
+          headers: {'Authorization': this.authToken},
+        });
         this.lists = this.lists.filter(list => list._id !== listId);
       } catch (error) {
         this.handleError(error.message);

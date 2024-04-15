@@ -10,7 +10,7 @@ const { updateUserStatus } = require("./utils/userStatus"); // Adjust the path a
 //const genSiteRoutes = require('./genSite'); // Adjust the path as needed
 //const apiKeyMiddleware = require('./middleware/apiKeyMiddleware');
 const friendRoutes = require('./routes/friendRoutes');
-
+const todoRoutes = require('./routes/todoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +34,7 @@ app.use(express.json());
 app.use("/api", authRoutes);
 app.use("/api", userProfileRoutes);
 app.use("/api/friends", friendRoutes);
+app.use("/api/todo", todoRoutes)
 
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
