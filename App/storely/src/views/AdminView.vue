@@ -16,7 +16,7 @@
           </div>
 
           <v-list-item three-line class="flex-grow-1">
-            <v-list-item-content>
+            <v-list-item>
               <v-list-item-title class="headline mb-1">{{ user.username }}</v-list-item-title>
               <v-list-item-subtitle>Name: {{ user.name }} {{ user.lastname }}</v-list-item-subtitle>
               <v-list-item-subtitle>Email: {{ user.email }}</v-list-item-subtitle>
@@ -29,7 +29,7 @@
                 <v-icon small v-else color="orange">mdi-clock-outline</v-icon> <!-- Assuming 'away' status -->
               </v-list-item-subtitle>
               
-            </v-list-item-content>
+            </v-list-item>
           </v-list-item>
 
           <v-card-actions class="justify-end">

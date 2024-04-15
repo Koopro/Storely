@@ -178,18 +178,21 @@
   </style>
 -->
 <template>
-  <Sidebar></Sidebar>
+  <Sidebar />
   <UserCard />
+  <FriendsCard />
 </template>
 
 <script>
 import Sidebar from '../components/sidebar/Sidebar.vue';
 import UserCard from '../components/User/UserCard.vue';
+import FriendsCard from '../components/friends/FriendsCard.vue';
 
 export default {
   components: {
     UserCard,
-    Sidebar
+    Sidebar,
+    FriendsCard,
   },
 }
 </script>

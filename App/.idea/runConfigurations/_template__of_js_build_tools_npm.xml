@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="true" type="js.build_tools.npm" singleton="false">
+    <package-json value="$PROJECT_DIR$/storely/package.json" />
+    <command value="run" />
+    <scripts />
+    <node-interpreter value="project" />
+    <envs />
+    <method v="2" />
+  </configuration>
+</component>

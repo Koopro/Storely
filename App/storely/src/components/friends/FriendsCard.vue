@@ -142,7 +142,7 @@ export default {
       try {
         const response = await fetch(`${this.apiUrl}/friends/list`, {
           method: 'GET',
-          headers: { 'Authorization': this.authToken }
+          headers: {'Authorization': this.authToken}
         });
         this.friends = await response.json();
       } catch (error) {
@@ -153,7 +153,7 @@ export default {
       try {
         const response = await fetch(`${this.apiUrl}/friends/pending`, {
           method: 'GET',
-          headers: { 'Authorization': this.authToken }
+          headers: {'Authorization': this.authToken}
         });
         this.friendRequests = await response.json();
       } catch (error) {
@@ -164,8 +164,8 @@ export default {
       try {
         const response = await fetch(`${this.apiUrl}/friends/accept`, {
           method: 'POST',
-          headers: { 'Authorization': this.authToken, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ friendshipId })
+          headers: {'Authorization': this.authToken, 'Content-Type': 'application/json'},
+          body: JSON.stringify({friendshipId})
         });
         const result = await response.json();
         this.showAlertWithMessage('Friend request accepted!', 'success');
@@ -179,8 +179,8 @@ export default {
       try {
         const response = await fetch(`${this.apiUrl}/friends/remove`, {
           method: 'POST',
-          headers: { 'Authorization': this.authToken, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ friendshipId })
+          headers: {'Authorization': this.authToken, 'Content-Type': 'application/json'},
+          body: JSON.stringify({friendshipId})
         });
         if (response.ok) {
           this.showAlertWithMessage('Friendship removed!', 'success');

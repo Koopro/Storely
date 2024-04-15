@@ -36,26 +36,28 @@
 </template>
 
 <script>
-import DarkModeToggle from '../sidebar/DarkModeToggle.vue';
+import DarkModeToggle from './DarkModeToggle.vue';
 
 export default {
   name: 'Sidebar',
   components: {
     DarkModeToggle
   },
-  data() {
+  provide() {
     return {
-      darkMode: false,
-      isExpanded: false
+      darkMode: this.darkMode
     };
   },
-  created() {
-    this.darkMode = localStorage.getItem('darkMode') === 'true';
+  data() {
+    return {
+      darkMode: localStorage.getItem('darkMode') === 'true',
+      isExpanded: false
+    };
   },
   methods: {
     toggleDarkMode(value) {
       this.darkMode = value;
-      localStorage.setItem('darkMode', value);
+      localStorage.setItem('darkMode', this.darkMode);
     },
     expandSidebar() {
       if (window.innerWidth > 500) {
@@ -68,6 +70,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .sidebar {
