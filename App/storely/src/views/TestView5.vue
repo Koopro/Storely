@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="content">
       <v-container>
         <!-- Sidebar -->
         <Sidebar />
@@ -61,7 +61,8 @@
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   }
-  
+
+  /* Hide vertical scrollbar */
   .chat-card {
     height: calc(100vh - 40px); /* Adjust height as needed */
     max-height: none;
@@ -73,7 +74,8 @@
     max-height: none;
   }
 
-  @media (max-width: 960px) { /* Vuetify breakpoint for MD and smaller */
+  /* Media query for devices with a maximum width of 960px (e.g., tablets and smaller laptops) */
+  @media (max-width: 960px) {
     .todo-card,
     .calendar-card,
     .chat-card {
@@ -81,5 +83,4 @@
       margin-left: 60px;
     }
   }
-  
-  </style>
+</style>
