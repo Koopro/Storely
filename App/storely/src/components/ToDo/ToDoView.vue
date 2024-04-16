@@ -7,42 +7,52 @@
     <div class="inner-menu">
       <ul>
         <!-- Automatisch Listenpunkte generieren basierend auf verfügbaren Listen -->
-        <li v-for="list in lists" :key="list._id" :style="{ backgroundColor: list.color }" :class="{ 'dark-list': isDarkMode }">
+        <li v-for="list in lists" :key="list._id" :style="{ backgroundColor: list.color }">
           {{ list.name }}
-          <i class="fas fa-trash" @click="promptDelete(list._id, list.password)"></i>
+          <i class="fas fa-trash" :class="{ 'fas fa-trash-dark': isDarkMode }" @click="promptDelete(list._id, list.password)"></i>
         </li>
       </ul>
     </div>
     <button class="add-list-button" :class="{ 'add-list-button-dark': isDarkMode }" @click="openPopup">Liste Hinzufügen</button>
   </div>
   <div class="background-white" :class="{ 'background-dark': isDarkMode }"></div>
+  
+  <!--List Popup-->
   <div class="popup-list-wrap">
     <div class="popup-add-list" :class="{ 'popup-add-list-DARK': isDarkMode }">
       <h1 class="popup-add-list-header">Wie soll die neue Liste heißen?</h1>
       <input type="text" class="popup-add-list-input" placeholder="Listenname" ref="listNameInput" :class="{ 'popup-add-list-input-DARK': isDarkMode }">
-      <input type="text" class="popup-add-list-password" placeholder="Passwort" v-model="listPassword" ref="listPasswordInput" :class="{ 'popup-add-list-input-DARK': isDarkMode }">
       <input type="color" class="popup-add-list-color" v-model="listColor">
-    <button class="popup-add-list-button" :class="{ 'popup-add-list-button-DARK': isDarkMode }" @click="addList">Hinzufügen</button>
+      <button class="popup-add-list-button" :class="{ 'popup-add-list-button-DARK': isDarkMode }" @click="addList">Hinzufügen</button>
     </div>
   </div>
   <div class="popup-background" :class="{ 'popup-background-DARK': isDarkMode }"></div>
+
+
+  <!--ToDo-->
+  <div class="ToDo" :class="{ 'ToDo-Dark': isDarkMode }">
+    <ToDo />
+    <button class="add-todo-button" :class="{ 'add-todo-button-DARK': isDarkMode }">ToDo Hinzufügen</button>
+  </div>
+
 </template>
 
 <script>
 import axios from 'axios';
 import Sidebar from '../sidebar/Sidebar.vue';
 import Clock from './Clock.vue';
+import ToDo from './ToDos.vue';
 
 export default {
   components: {
     Sidebar, 
-    Clock
+    Clock, 
+    ToDo
   },
   data() {
   return {
     isDarkMode: false,
     lists: [],
-    listPassword: '',  // Speichern des Passworts für die Liste
     listColor: '#ffffff',  // Standardfarbe, falls keine gewählt wird
     authToken: `Bearer ${localStorage.getItem('authToken')}`,
     apiUrl: `${process.env.VUE_APP_API_URL}/api`
@@ -71,15 +81,13 @@ export default {
     },
     async addList() {
       const listName = this.$refs.listNameInput.value.trim();
-      const listPassword = this.listPassword.trim();
       const listColor = this.listColor;
-      if (listName === "" || listPassword === "") {
-        alert("Bitte gib einen Listennamen und Passwort ein.");
+      if (listName === "") {
+        alert("Bitte gib einen Listennamen ein.");
       } else {
         try {
           const response = await axios.post(`${this.apiUrl}/todo/lists`, {
             name: listName,
-            password: listPassword,
             color: listColor
           }, {
             method:'POST',
@@ -88,7 +96,6 @@ export default {
 
           this.lists.push(response.data);
           this.$refs.listNameInput.value = "";
-          this.listPassword = "";  // Reset
           this.listColor = "#ffffff";  // Reset auf Standardfarbe
           this.closePopup();
         } catch (error) {
@@ -109,13 +116,8 @@ export default {
       }
     },
 
-    promptDelete(listId, expectedPassword) {
-      const password = prompt("Bitte geben Sie das Passwort für diese Liste ein:");
-      if (password === expectedPassword) {
+    promptDelete(listId) {
         this.deleteList(listId);
-      } else {
-        alert("Falsches Passwort, Liste wurde nicht gelöscht.");
-      }
     },
 
     async deleteList(listId) {
@@ -144,26 +146,12 @@ export default {
     margin: 0;
     padding: 0;
   }
-
-  .background-white {
-    background-color: white;
-    position: absolute; 
-    z-index: 0;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-  }
-
-  .background-dark {
-    background-color: #9f9f9f;
-  }
   
   .top {
     position: fixed;
     top: 0;
     left: 0;
-    height: 104px;
+    height: 10%;
     width: 100%;
     background-color: #3a3a3a; /* Standard color */
     z-index: 999;
@@ -181,7 +169,7 @@ export default {
     justify-content: center;
     z-index: 1;
     height: 100%;
-    width: 425px;
+    width: 25%;
     background-color: #aeaeae; /* Standard color */
     transition: background-color 0.3s; /* Smooth transition for background color */
   }
@@ -297,18 +285,6 @@ export default {
     background-color: rgba(255, 255, 255, 0.4);
   }
 
-  .popup-add-list-password {
-    position: absolute;
-    top: 60%;
-    /* Den Input Text nach rechts verschieben */
-    padding-left: 10px;
-    width: 90%;
-    height: 30px;
-    border-radius: 7px;
-    border: 3px solid rgb(0, 0, 0);
-    background-color: rgba(255, 255, 255, 0.4);
-  }
-
 
   .popup-add-list-input-DARK {
     border: 2px solid #ffffff;
@@ -338,14 +314,28 @@ export default {
   align-items: center;
   border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.4); /* Hintergrundfarbe des li-Elements */
+  font-weight: bolder;
+  text-transform: uppercase;
   color: black; /* Textfarbe */
   padding: 5px 5px;
   margin-bottom: 10px; /* Distance between li elements */
+  padding-left: 15px;
   }
 
   li i.fas.fa-trash {
     color: red; /* Farbe des Mülleimer-Icons */
     cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #aeaeae;
+    border-radius: 20px;
+  }
+
+  li i.fas.fa-trash-dark {
+    background-color: #414141;
   }
   
   .clock {
@@ -354,6 +344,36 @@ export default {
 
   .clock-dark {
     color: rgb(157, 157, 157)
+  }
+
+  .ToDo {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    top: 10%;
+    left: 25%;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+  }
+
+  .ToDo-Dark {
+    background-color: #9f9f9f;
+  }
+
+  .add-todo-button {
+    position: absolute;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    bottom: 20px;
+    height: 35px;
+    width: 200px;
+    z-index: 999;
+    border-radius: 10px;
+    background-color: #707070;
+    color: rgb(0, 0, 0);
   }
 
 </style>

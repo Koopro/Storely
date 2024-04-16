@@ -2,16 +2,15 @@ const List = require('../models/List');
 const cors = require('cors');
 
 exports.listspost = async (req, res) => {
-    const { name, password, color } = req.body;
+    const { name, color } = req.body;
     const userId = req.userData.user._id; // Assuming `req.user` is populated from your authentication middleware
 
-    if (!name || !password) {
-        return res.status(400).send({ message: 'Name and password are required' });
+    if (!name) {
+        return res.status(400).send({ message: 'Name are required' });
     }
 
     const newList = new List({
         name,
-        password,
         color,
         user: userId
     });
