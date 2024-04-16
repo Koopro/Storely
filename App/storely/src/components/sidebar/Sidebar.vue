@@ -14,12 +14,18 @@
           </router-link>
           <router-link to="/todo" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
             <v-icon :class="'mdi mdi-format-list-checks'"></v-icon>
-            <span class="link-name" v-show="isExpanded">TODO</span>
+            <span class="link-name" v-show="isExpanded">ToDo</span>
           </router-link>
+          <router-link to="/testing7" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
+            <v-icon :class="'mdi mdi-forum-outline'"></v-icon>
+            <span class="link-name" v-show="isExpanded">Chat</span>
+          </router-link>
+          <div class="bottom">
           <router-link to="/testing2" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
             <v-icon :class="'mdi mdi-account-outline'"></v-icon>
             <span class="link-name" v-show="isExpanded">Profile</span>
           </router-link>
+        </div>
         </div>
         <!-- Dark Mode Toggle Button -->
         <div v-if="isExpanded === false" class="dark-mode-toggle-container">
@@ -141,6 +147,14 @@ export default {
   transform: translate(-50%);
   z-index: 999;
   transition: ease-out 2s;
+}
+
+.bottom {
+  position: absolute;
+  bottom: 65px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 </style>
