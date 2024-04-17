@@ -70,7 +70,7 @@
             <template v-if="friendRequests.length > 0">
               <v-list-item v-for="request in friendRequests" :key="request._id" class="user-item">
                 <v-avatar tile size="56">
-                  <img :src="request.requester.profileImageUrl" alt="Requester's Profile Picture">
+                  <img :src="'https://api.storely.at'+request.requester.profileImageUrl" alt="Requester's Profile Picture">
                 </v-avatar>
                 <v-list-item>
                   <v-list-item-title class="headline">{{ request.requester?.name }} wants to connect</v-list-item-title>
