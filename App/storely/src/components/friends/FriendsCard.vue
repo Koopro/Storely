@@ -17,12 +17,12 @@
             <template v-if="friends.length > 0">
               <v-list-item v-for="user in users" :key="user._id" two-line>
                 <v-avatar>
-                  <img :src="user.profileImageUrl" alt="User's Profile Picture">
+                  <img :src="'https://api.storely.at'+user.profileImageUrl" alt="User's Profile Picture">
                 </v-avatar>
-                <v-list-item-content>
+                <v-list-item>
                   <v-list-item-title class="headline">{{ user.name }}</v-list-item-title>
                   <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
-                </v-list-item-content>
+                </v-list-item>
                 <v-list-item-action>
                   <v-btn icon @click="addFriend(user._id)">
                     <v-icon color="green">mdi-account-plus</v-icon>
