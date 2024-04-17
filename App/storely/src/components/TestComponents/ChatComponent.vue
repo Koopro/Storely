@@ -1,6 +1,9 @@
 <template>
   <div class="chat-container">
-    <div class="users-container">
+    <div v-if="friends.length === 0" class="no-friends">
+      <p>You don't have any friends yet. Please add friends in your profile.</p>
+    </div>
+    <div v-else class="users-container">
       <div v-for="(friend, index) in friends" :key="index" class="chat-user" :class="{ 'active': friend === selectedUser }" @click="selectUser(friend)">
         {{ friend.recipient.name }}
       </div>
@@ -39,7 +42,7 @@ export default {
             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
           },
         });
-        console.log('Fetched friends:', response.data); // Ausgabe der abgerufenen Daten
+        console.log('Fetched friends:', response.data);
         this.friends = response.data;
       } catch (error) {
         console.error('Error fetching friends:', error);
@@ -54,7 +57,6 @@ export default {
     sendMessage() {
       if (!this.selectedUser) return;
       if (this.newMessage.trim() === '') return;
-      // Überprüfe, ob selectedUser eine Nachrichtenliste hat
       if (!this.selectedUser.messages) {
         this.$set(this.selectedUser, 'messages', []);
       }
@@ -74,9 +76,16 @@ export default {
 
 <style scoped>
 /* Styles for the user list */
+.no-friends{
+  width: auto;
+  max-width: 250px;
+  padding-left: 10px;
+  border-right: 1px solid #ccc;
+}
 .users-container {
   width: auto;
   overflow-y: auto;
+  max-width: 100px;
 }
 
 .chat-user {
@@ -122,6 +131,14 @@ export default {
   flex: 1;
 }
 
+.no-friends {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+}
+
 .chat-container {
   display: flex;
   border: 1px solid #ccc;
@@ -158,4 +175,11 @@ export default {
 .active {
   background-color: #f0f0f0;
 }
+
+@media (max-width: 450px) {
+  .no-friends {
+    max-width: 100px;
+  }
+}
+
 </style>

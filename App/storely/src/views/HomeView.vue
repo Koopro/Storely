@@ -75,7 +75,7 @@ export default {
 }
 
 /* Media query for devices with a maximum width of 960px (e.g., tablets and smaller laptops) */
-@media (max-width: 960px) {
+@media (max-width: 1025px) {
   .todo-card,
   .calendar-card,
   .chat-card {
