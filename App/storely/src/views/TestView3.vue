@@ -44,7 +44,7 @@
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title class="headline">
-                    {{ friend.recipient === getUser._id ? friend.recipient.name : friend.requester.name }}                  </v-list-item-title>
+                    {{ friend.requester.name === getUser._id ? friend.recipient.name : friend.requester.name }}                  </v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action>
                   <v-btn icon @click="removeFriend(friend._id)">
@@ -118,6 +118,7 @@ export default {
         }
         const data = await response.json();
         this.getUser = data;
+
       } catch (error) {
         console.error('Failed to fetch user info:', error);
       }
