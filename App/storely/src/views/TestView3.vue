@@ -46,13 +46,6 @@
                   <v-list-item-title class="headline">
                     {{ friend.requester._id === getUser._id ? friend.recipient.name : friend.requester.name }}
                   </v-list-item-title>
-
-                  <div>
-                    Requester ID: {{ friend.requester._id }}, Current User ID: {{ getUser._id }}
-                    <br>
-                    Resulting name: {{ friend.requester._id === getUser._id ? friend.recipient.name : friend.requester.name }}
-                  </div>
-
                 </v-list-item-content>
                 <v-list-item-action>
                   <v-btn icon @click="removeFriend(friend._id)">
