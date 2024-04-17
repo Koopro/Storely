@@ -44,7 +44,7 @@
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title class="headline">
-                    {{ friend.recipient === currentUserId ? friend.recipient.name : friend.requester.name }}                  </v-list-item-title>
+                    {{ friend.recipient === getUser._id ? friend.recipient.name : friend.requester.name }}                  </v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action>
                   <v-btn icon @click="removeFriend(friend._id)">
@@ -101,9 +101,28 @@ export default {
     authToken: `Bearer ${localStorage.getItem('authToken')}`,
     showAlert: false,
     alertText: '',
-    alertColor: 'success'
+    alertColor: 'success',
+    getUser: null,
   }),
   methods: {
+    async getUserInfo() {
+      try {
+        const response = await fetch(`${this.apiUrl}/user/profile`, {
+          method: 'GET',
+          headers: {
+            'Authorization': this.authToken
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        this.getUser = data;
+      } catch (error) {
+        console.error('Failed to fetch user info:', error);
+      }
+    },
+
     async fetchUsers() {
       try {
         const response = await fetch(`${this.apiUrl}/users`, {
@@ -203,6 +222,10 @@ export default {
     this.fetchUsers();
     this.fetchFriends();
     this.fetchFriendRequests();
+    this.getUserInfo()
+  },
+  mounted() {
+    this.getUserInfo();
   }
 }
 </script>
