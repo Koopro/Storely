@@ -5,6 +5,7 @@
         <v-tab key="users">Users</v-tab>
         <v-tab key="friends">Friends</v-tab>
         <v-tab key="requests">Friend Requests</v-tab>
+        <v-tab key="outgoing">Pending Sent Requests</v-tab>
       </v-tabs>
 
       <v-window v-model="tab">
@@ -15,35 +16,36 @@
             <v-divider></v-divider>
             <v-list-item-group>
               <v-list-item v-for="user in users" :key="user._id" two-line>
-                <v-list-item-avatar tile size="56">
-                  <v-icon large>mdi-account-circle</v-icon>
-                </v-list-item-avatar>
-                <v-list-item-content>
+                <v-avatar>
+                  <img :src="user.profileImageUrl" alt="User's Profile Picture">
+                </v-avatar>
+                <v-list-item-action>
                   <v-list-item-title class="headline">{{ user.name }}</v-list-item-title>
                   <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
-                </v-list-item-content>
-                <v-list-item-action>
                   <v-btn icon @click="addFriend(user._id)">
                     <v-icon color="green">mdi-account-plus</v-icon>
                   </v-btn>
                 </v-list-item-action>
               </v-list-item>
+
             </v-list-item-group>
           </v-list>
         </v-window-item>
 
         <!-- Friends Tab -->
         <v-window-item value="friends">
-          <v-list dense subheader>
+          <v-list dense>
             <v-subheader class="text-h5 pa-2">My Friends</v-subheader>
             <v-divider></v-divider>
-            <v-list-item-group>
-              <v-list-item v-for="friend in friends" :key="friend._id" two-line>
-                <v-list-item-avatar tile size="56">
-                  <v-icon large>mdi-account-check</v-icon>
-                </v-list-item-avatar>
+            <template v-if="friends.length > 0">
+              <v-list-item v-for="friend in friends" :key="friend._id" class="user-item">
+                <v-avatar tile size="56">
+                  <img :src="getFriendPfp(friend)" alt="Friend's Profile Picture">
+                </v-avatar>
                 <v-list-item-content>
-                  <v-list-item-title class="headline">{{ friend.requester.name }} & {{ friend.recipient.name }}</v-list-item-title>
+                  <v-list-item-title class="headline">
+                    {{ friend.requester._id === currentUserId ? friend.recipient.name : friend.requester.name }}
+                  </v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action>
                   <v-btn icon @click="removeFriend(friend._id)">
@@ -51,22 +53,29 @@
                   </v-btn>
                 </v-list-item-action>
               </v-list-item>
-            </v-list-item-group>
+
+            </template>
+            <v-list-item v-else>
+              <v-list-item-content class="text-center">
+                No friends yet.
+              </v-list-item-content>
+            </v-list-item>
           </v-list>
         </v-window-item>
 
+
         <!-- Friend Requests Tab -->
         <v-window-item value="requests">
-          <v-list dense subheader>
+          <v-list dense>
             <v-subheader class="text-h5 pa-2">Friend Requests</v-subheader>
             <v-divider></v-divider>
-            <v-list-item-group>
-              <v-list-item v-for="request in friendRequests" :key="request._id" two-line>
-                <v-list-item-avatar tile size="56">
-                  <v-icon large>mdi-account-question</v-icon>
-                </v-list-item-avatar>
+            <template v-if="friendRequests.length > 0">
+              <v-list-item v-for="request in friendRequests" :key="request._id" class="user-item">
+                <v-avatar tile size="56">
+                  <img :src="request.requester.profileImageUrl" alt="Requester's Profile Picture">
+                </v-avatar>
                 <v-list-item-content>
-                  <v-list-item-title class="headline">{{ request.requester.name }} wants to connect</v-list-item-title>
+                  <v-list-item-title class="headline">{{ request.requester?.name }} wants to connect</v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action>
                   <v-btn icon @click="acceptFriend(request._id)">
@@ -74,9 +83,40 @@
                   </v-btn>
                 </v-list-item-action>
               </v-list-item>
-            </v-list-item-group>
+
+            </template>
+            <v-list-item v-else>
+              <v-list-item-content class="text-center">
+                No friend requests.
+              </v-list-item-content>
+            </v-list-item>
           </v-list>
         </v-window-item>
+
+
+        <!-- Outgoing Requests Tab -->
+        <v-window-item value="outgoing">
+          <v-list dense>
+            <v-subheader class="text-h5 pa-2">Pending Sent Requests</v-subheader>
+            <v-divider></v-divider>
+            <template v-if="outgoingRequests.length > 0">
+              <v-list-item v-for="request in outgoingRequests" :key="request._id" class="user-item">
+                <v-list-item-avatar tile size="56">
+                  <v-icon large>mdi-account-clock</v-icon>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title class="headline">Awaiting {{ request.recipient.name }}'s response</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+            <v-list-item v-else>
+              <v-list-item-content class="text-center">
+                No pending requests sent.
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-window-item>
+
       </v-window>
     </v-card>
 
@@ -103,17 +143,27 @@ export default {
     alertColor: 'success'
   }),
   methods: {
+
+    getFriendPfp(friend) {
+      const friendProfile = friend.requester._id === this.currentUserId ? friend.recipient : friend.requester;
+      return friendProfile.profileImageUrl ? `${process.env.VUE_APP_API_URL}${friendProfile.profileImageUrl}`: null;
+    },
     async fetchUsers() {
       try {
         const response = await fetch(`${this.apiUrl}/users`, {
           method: 'GET',
           headers: { 'Authorization': this.authToken }
         });
-        this.users = await response.json();
+        const users = await response.json();
+        this.users = users.map(user => ({
+          ...user,
+          profileImageUrl: user.profileImageUrl ? `${process.env.VUE_APP_API_URL}${user.profileImageUrl}` : user.profileImageUrl
+        }));
       } catch (error) {
         this.showAlertWithMessage('Failed to fetch users', 'error');
       }
     },
+
     async addFriend(friendId) {
       try {
         const response = await fetch(`${this.apiUrl}/friends/request`, {
@@ -242,6 +292,12 @@ v-list-item:hover {
 
 .v-list-item-action .v-btn:hover {
   transform: scale(1.1); /* Slightly enlarge buttons on hover */
+}
+
+.v-avatar img, .v-list-item-avatar img {
+  max-width: 100%;  /* Ensures the image does not exceed the container's width */
+  max-height: 100%; /* Ensures the image does not exceed the container's height */
+  border-radius: 50%; /* Makes the avatar image round */
 }
 
 .v-avatar .v-icon {

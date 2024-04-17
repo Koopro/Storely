@@ -3,7 +3,7 @@ const cors = require('cors');
 
 exports.listspost = async (req, res) => {
     const { name, color } = req.body;
-    const userId = req.userData.user._id; // Assuming `req.user` is populated from your authentication middleware
+    const userId = req.userData.userId; // Assuming `req.user` is populated from your authentication middleware
 
     if (!name) {
         return res.status(400).send({ message: 'Name are required' });

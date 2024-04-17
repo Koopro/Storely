@@ -67,7 +67,7 @@
 
 .profile-name, h2 {
   margin-bottom: 2vh;
-  font-size: 4vw;
+  font-size: 2rem;
   max-size: 22px; /* Prevent the font from becoming too large on big screens */
   font-weight: bold;
 }

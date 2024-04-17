@@ -11,6 +11,7 @@ import TestView4 from '../views/TestView4.vue';
 import TestView5 from '../views/TestView5.vue';
 import TestView7 from '../views/TestView7.vue';
 import AdminView from '../views/AdminView.vue';
+import NotesView from '../views/NotesView.vue';
 
 const routes = [
   {
@@ -77,6 +78,11 @@ const routes = [
     path: '/admin',
     name: 'admin',
     component: AdminView,
+  },
+  {
+    path: '/notes',
+    name: 'notes',
+    component: NotesView
   }
 ];
 
@@ -107,7 +113,5 @@ router.beforeEach((to, from, next) => {
 export default router;
 
 function isLoggedIn() {
-  // Implement your logic here to check if the user is logged in
-  // For example, check if a valid token exists:
   return !!localStorage.getItem('authToken');
 }

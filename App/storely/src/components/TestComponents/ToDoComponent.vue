@@ -5,8 +5,8 @@
         <!-- Folder List -->
         <v-col cols="3">
           <v-list dense>
-            <v-subheader>Folders</v-subheader>
-            <v-list-item-group v-model="activeFolderIndex" color="primary">
+            <v-list-subheader>Folders</v-list-subheader>
+            <v-list-group v-model="activeFolderIndex" color="primary">
               <v-list-item v-for="(folder, index) in folders" :key="folder.name" @click="selectFolder(index)">
                 <v-list-item-icon>
                   <v-icon>{{ folder.icon }}</v-icon>
@@ -16,7 +16,7 @@
                   <v-chip v-if="noteCounts[folder.name]" small>{{ noteCounts[folder.name] }}</v-chip>
                 </v-list-item-content>
               </v-list-item>
-            </v-list-item-group>
+            </v-list-group>
             <v-divider></v-divider>
             <v-list-item>
               <v-text-field dense flat hide-details placeholder="New folder" v-model="newFolderName"></v-text-field>
