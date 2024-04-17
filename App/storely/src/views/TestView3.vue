@@ -43,7 +43,8 @@
                   <v-icon large>mdi-account-check</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
-                  <v-list-item-title class="headline">{{ friend.requester.name }} & {{ friend.recipient.name }}</v-list-item-title>
+                  <v-list-item-title class="headline">
+                    {{ friend.recipient === currentUserId ? friend.recipient.name : friend.requester.name }}                  </v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action>
                   <v-btn icon @click="removeFriend(friend._id)">
