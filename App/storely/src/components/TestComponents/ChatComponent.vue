@@ -5,7 +5,9 @@
     </div>
     <div v-else class="users-container">
       <div v-for="(friend, index) in friends" :key="index" class="chat-user" :class="{ 'active': friend === selectedUser }" @click="selectUser(friend)">
-        {{ friend.requester._id === getUser._id ? friend.recipient.name : friend.requester.name }}
+        <v-avatar :src="getFriendPfp(friend)"></v-avatar>
+
+        {{ displayFriendName(friend) }}
       </div>
     </div>
     <div class="chat-content">
@@ -33,40 +35,38 @@ export default {
       authToken: `Bearer ${localStorage.getItem('authToken')}`,
     };
   },
-  mounted() {
-    this.fetchFriends();
-    this.getUserInfo();
+  async beforeMount() {
+    await this.fetchFriends();
+    await this.getUserInfo();
   },
   methods: {
-
+    getFriendPfp(friend) {
+      if (!this.getUser) return null;
+      const friendProfile = friend.requester._id === this.getUser._id ? friend.recipient : friend.requester;
+      return friendProfile.profileImageUrl ? `${process.env.VUE_APP_API_URL}${friendProfile.profileImageUrl}`: null;
+    },
+    displayFriendName(friend) {
+      return this.getUser && (friend.requester._id === this.getUser._id ? friend.recipient.name : friend.requester.name);
+    },
     async getUserInfo() {
       try {
-        const response = await fetch(`${process.env.VUE_APP_API_URL}/api/user/profile`, {
-          method: 'GET',
-          credentials: 'include',
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/user/profile`, {
           headers: {
             'Authorization': this.authToken
           }
         });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        this.getUser = data;
-
+        this.getUser = response.data;
       } catch (error) {
         console.error('Failed to fetch user info:', error);
       }
     },
-
     async fetchFriends() {
       try {
         const response = await axios.get('https://api.storely.at/api/friends/list', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+            'Authorization': this.authToken,
           },
         });
-        console.log('Fetched friends:', response.data);
         this.friends = response.data;
       } catch (error) {
         console.error('Error fetching friends:', error);
@@ -74,16 +74,10 @@ export default {
     },
     selectUser(user) {
       this.selectedUser = user;
-      this.$nextTick(() => {
-        this.scrollToBottom();
-      });
+      this.$nextTick(this.scrollToBottom);
     },
     sendMessage() {
-      if (!this.selectedUser) return;
-      if (this.newMessage.trim() === '') return;
-      if (!this.selectedUser.messages) {
-        this.$set(this.selectedUser, 'messages', []);
-      }
+      if (!this.selectedUser || !this.newMessage.trim()) return;
       this.selectedUser.messages.push({
         sender: 'You',
         text: this.newMessage
@@ -100,69 +94,31 @@ export default {
 
 <style scoped>
 /* Styles for the user list */
-.no-friends{
-  width: auto;
-  max-width: 250px;
-  padding-left: 10px;
-  border-right: 1px solid #ccc;
-}
-.users-container {
-  width: auto;
-  overflow-y: auto;
-  max-width: 100px;
-}
-
-.chat-user {
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #ccc;
-}
-
-.chat-user:hover {
-  background-color: #f0f0f0;
-}
-
-.active {
-  background-color: #ddd;
-}
-
-/* Styles for the chat content */
-.chat-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-messages {
-  overflow-y: auto;
-  padding: 10px;
-  border-left: 1px solid #ccc;
-}
-
-.message {
-  margin-bottom: 10px;
-}
-
-.message-sender {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.no-user-selected {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-}
-
 .no-friends {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   height: 100%;
+  max-width: 250px;
+  padding-left: 10px;
+  border-right: 1px solid #ccc;
 }
-
+.users-container {
+  width: 150px;
+  overflow-y: auto;
+}
+.chat-user {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ccc;
+}
+.chat-user:hover, .active {
+  background-color: #f0f0f0;
+}
+/* Styles for the chat content */
 .chat-container {
   display: flex;
   border: 1px solid #ccc;
@@ -170,22 +126,16 @@ export default {
   overflow: hidden;
   height: 35rem;
 }
-
-.users-container {
-  width: 150px;
-  overflow-y: auto;
-}
-
 .chat-content {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-
 .chat-messages {
   height: 33rem;
   overflow-y: auto;
   padding: 10px;
+  border-left: 1px solid
 }
 
 .chat-input {
