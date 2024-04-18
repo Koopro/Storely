@@ -23,7 +23,7 @@ exports.listspost = async (req, res) => {
     }
 };
 exports.listsget = async (req, res) => {
-    const userId = req.userData.user._id; // Ensure user is authenticated
+    const userId = req.userData.userId; // Ensure user is authenticated
 
     try {
         const lists = await List.find({ user: userId });

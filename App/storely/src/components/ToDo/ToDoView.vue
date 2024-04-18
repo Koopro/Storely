@@ -91,6 +91,7 @@ export default {
             color: listColor
           }, {
             method:'POST',
+            credentials: 'include',
             headers: { 'Authorization': this.authToken }
           });
 
@@ -108,6 +109,7 @@ export default {
       try {
         const response = await axios.get(`${this.apiUrl}/todo/lists` ,{
           method: 'GET',
+          credentials: 'include',
           headers: {'Authorization': this.authToken},
         });
         this.lists = response.data;
@@ -124,6 +126,7 @@ export default {
       try {
         await axios.delete(`${this.apiUrl}/todo/lists/${listId}`,{
           headers: {'Authorization': this.authToken},
+          credentials: 'include',
         });
         this.lists = this.lists.filter(list => list._id !== listId);
       } catch (error) {

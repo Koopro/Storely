@@ -146,9 +146,10 @@ export default {
       try {
         const response = await fetch(`${this.apiUrl}/user/profile`, {
           method: 'GET',
+          credentials: 'include',
           headers: {
             'Authorization': this.authToken
-          }
+          } 
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

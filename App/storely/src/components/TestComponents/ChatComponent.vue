@@ -5,7 +5,7 @@
     </div>
     <div v-else class="users-container">
       <div v-for="(friend, index) in friends" :key="index" class="chat-user" :class="{ 'active': friend === selectedUser }" @click="selectUser(friend)">
-        {{ friend.recipient.name }}
+        {{ friend.requester._id === getUser._id ? friend.recipient.name : friend.requester.name }}
       </div>
     </div>
     <div class="chat-content">
@@ -28,13 +28,37 @@ export default {
     return {
       selectedUser: null,
       newMessage: '',
-      friends: []
+      friends: [],
+      getUser: null,
+      authToken: `Bearer ${localStorage.getItem('authToken')}`,
     };
   },
   mounted() {
     this.fetchFriends();
+    this.getUserInfo();
   },
   methods: {
+
+    async getUserInfo() {
+      try {
+        const response = await fetch(`${process.env.VUE_APP_API_URL}/api/user/profile`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Authorization': this.authToken
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        this.getUser = data;
+
+      } catch (error) {
+        console.error('Failed to fetch user info:', error);
+      }
+    },
+
     async fetchFriends() {
       try {
         const response = await axios.get('https://api.storely.at/api/friends/list', {
