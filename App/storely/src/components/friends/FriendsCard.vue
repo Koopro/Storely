@@ -14,10 +14,10 @@
           <v-list dense subheader>
             <v-list-subheader class="text-h5 pa-2">All Users</v-list-subheader>
             <v-divider></v-divider>
-            <template v-if="friends.length > 0">
+            <template v-if="users.length > 0">
               <v-list-item v-for="user in users" :key="user._id" two-line>
                 <v-avatar>
-                  <img :src="'https://api.storely.at'+user.profileImageUrl" alt="User's Profile Picture">
+                  <img :src="'https://api.storely.at' + user.profileImageUrl" alt="User's Profile Picture">
                 </v-avatar>
                 <v-list-item>
                   <v-list-item-title class="headline">{{ user.name }}</v-list-item-title>
@@ -29,10 +29,14 @@
                   </v-btn>
                 </v-list-item-action>
               </v-list-item>
-
             </template>
-          </v-list>
+            <v-list-item v-else>
+              <v-list-item class="text-center">
+                No users found.
+              </v-list-item>
+            </v-list-item>
 
+          </v-list>
         </v-window-item>
 
         <!-- Friends Tab -->
@@ -174,11 +178,15 @@ export default {
           method: 'GET',
           headers: { 'Authorization': this.authToken }
         });
-        this.users = await response.json();
+        const data = await response.json();
+        console.log("Fetched users:", data); // This should show the array of users
+        this.users = data;
       } catch (error) {
         this.showAlertWithMessage('Failed to fetch users', 'error');
+        console.error('Error fetching users:', error);
       }
     },
+
 
 
 
