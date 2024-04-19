@@ -105,7 +105,9 @@ export default {
             const imageResponse = await axios.post(`${process.env.VUE_APP_API_URL}/upload`, formData, {
               headers: {
                 'Content-Type': 'multipart/form-data'
-              }
+              },
+              credentials: 'include',
+
             });
             this.user.imageURL = imageResponse.data.filePath;
           }

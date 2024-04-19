@@ -125,6 +125,7 @@ export default {
     async deleteList(listId) {
       try {
         await axios.delete(`${this.apiUrl}/todo/lists/${listId}`,{
+          method:"DELETE",
           headers: {'Authorization': this.authToken},
           credentials: 'include',
         });

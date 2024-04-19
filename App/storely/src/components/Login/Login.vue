@@ -141,6 +141,9 @@ export default {
         const response = await axios.post(`${process.env.VUE_APP_API_URL}/api/login`, {
           email: this.email,
           password: this.password,
+        },{
+          credentials: 'include',
+
         });
 
         // Assuming the response includes a token you want to store
@@ -171,7 +174,9 @@ export default {
         }, {
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
+          credentials: 'include',
+
         });
 
         // Assuming the backend sends a response indicating the user needs to confirm their email
