@@ -94,31 +94,69 @@ export default {
 
 <style scoped>
 /* Styles for the user list */
+.no-friends{
+  width: auto;
+  max-width: 250px;
+  padding-left: 10px;
+  border-right: 1px solid #ccc;
+}
+.users-container {
+  width: auto;
+  overflow-y: auto;
+  max-width: 100px;
+}
+
+.chat-user {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ccc;
+}
+
+.chat-user:hover {
+  background-color: #f0f0f0;
+}
+
+.active {
+  background-color: #ddd;
+}
+
+/* Styles for the chat content */
+.chat-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages {
+  overflow-y: auto;
+  padding: 10px;
+  border-left: 1px solid #ccc;
+}
+
+.message {
+  margin-bottom: 10px;
+}
+
+.message-sender {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.no-user-selected {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
 .no-friends {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   height: 100%;
-  max-width: 250px;
-  padding-left: 10px;
-  border-right: 1px solid #ccc;
 }
-.users-container {
-  width: 150px;
-  overflow-y: auto;
-}
-.chat-user {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #ccc;
-}
-.chat-user:hover, .active {
-  background-color: #f0f0f0;
-}
-/* Styles for the chat content */
+
 .chat-container {
   display: flex;
   border: 1px solid #ccc;
@@ -126,16 +164,22 @@ export default {
   overflow: hidden;
   height: 35rem;
 }
+
+.users-container {
+  width: 150px;
+  overflow-y: auto;
+}
+
 .chat-content {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
+
 .chat-messages {
   height: 33rem;
   overflow-y: auto;
   padding: 10px;
-  border-left: 1px solid
 }
 
 .chat-input {
