@@ -5,27 +5,31 @@
         <!-- Top Links -->
         <div class="top-links" :style="{ justifyContent: isExpanded ? 'flex-start' : 'center' }">
           <router-link to="/home" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
-            <v-icon :class="'mdi mdi-home-outline'"></v-icon>
+            <v-icon :class="'mdi mdi-home-outline' + (darkMode ? ' dark-icon' : '')"></v-icon>
             <span class="link-name" v-show="isExpanded">Home</span>
           </router-link>
           <router-link to="/calendar" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
-            <v-icon :class="'mdi mdi-calendar-text'"></v-icon>
+            <v-icon :class="'mdi mdi-calendar-text' + (darkMode ? ' dark-icon' : '')"></v-icon>
             <span class="link-name" v-show="isExpanded">Calendar</span>
           </router-link>
           <router-link to="/todo" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
-            <v-icon :class="'mdi mdi-format-list-checks'"></v-icon>
+            <v-icon :class="'mdi mdi-format-list-checks' + (darkMode ? ' dark-icon' : '')"></v-icon>
             <span class="link-name" v-show="isExpanded">ToDo</span>
           </router-link>
           <router-link to="/testing7" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
-            <v-icon :class="'mdi mdi-forum-outline'"></v-icon>
+            <v-icon :class="'mdi mdi-forum-outline' + (darkMode ? ' dark-icon' : '')"></v-icon>
             <span class="link-name" v-show="isExpanded">Chat</span>
           </router-link>
           <div class="bottom">
-          <router-link to="/testing2" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
-            <v-icon :class="'mdi mdi-account-outline'"></v-icon>
-            <span class="link-name" v-show="isExpanded">Profile</span>
-          </router-link>
-        </div>
+            <router-link to="/testing2" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
+              <v-icon :class="'mdi mdi-account-outline' + (darkMode ? ' dark-icon' : '')"></v-icon>
+            </router-link>
+          </div>
+          <div class="logout-button">
+            <v-btn @click="logout" class="logout-btn" outlined>
+              <v-icon :class="'mdi mdi-logout' + (darkMode ? ' dark-icon' : '')"></v-icon>
+            </v-btn>
+          </div>
         </div>
         <!-- Dark Mode Toggle Button -->
         <div v-if="isExpanded === false" class="dark-mode-toggle-container">
@@ -72,11 +76,14 @@ export default {
     },
     collapseSidebar() {
       this.isExpanded = false;
+    },
+    logout() {
+      localStorage.clear();
+      location.reload();
     }
   }
 };
 </script>
-
 
 <style scoped>
 .sidebar {
@@ -151,10 +158,46 @@ export default {
 
 .bottom {
   position: absolute;
-  bottom: 65px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  bottom: 115px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
+.logout-button {
+  position: absolute;
+  bottom: 65px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.logout-btn {
+  color: #323232;
+  background-color: transparent; /* Transparente Hintergrundfarbe */
+  border: none; /* Keine Umrandung */
+}
+
+.logout-btn:hover {
+  color: #555; /* Farbänderung im Hover-Zustand */
+}
+
+.profile-link {
+  position: absolute;
+  bottom: 120px; /* Position anpassen */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
+.profile-btn {
+  color: #000;
+  background-color: #fff; /* Hintergrundfarbe im Light Mode */
+}
+
+.profile-btn:hover {
+  background-color: #ddd; /* Hintergrundfarbe im Hover-Zustand */
+}
+
+.dark-icon {
+  color: #fff; /* Farbe des Icons im Dark Mode */
+}
 </style>
