@@ -11,14 +11,18 @@
         <v-col cols="12" md="7">
           <!-- Todo Card -->
           <v-card class="todo-card">
+            <a href="/todo" class="link">
             <v-card-title class="text-h5">To-Do</v-card-title>
+            </a>
             <v-card-text>
               <!-- Todo content here -->
             </v-card-text>
           </v-card>
           <!-- Calendar Card -->
           <v-card class="calendar-card">
+            <a href="/calendar" class="link">
             <v-card-title class="text-h5">Calendar</v-card-title>
+            </a>
             <v-card-text>
               <!-- Calendar content here -->
             </v-card-text>
@@ -28,7 +32,9 @@
         <!-- Right Column for Chat Card -->
         <v-col cols="12" md="5">
           <v-card class="chat-card">
+            <a href="/chat" class="link">
             <v-card-title class="text-h5">Chat</v-card-title>
+            </a>
             <v-card-text>
               <Chat />
             </v-card-text>
@@ -72,6 +78,11 @@ export default {
 .calendar-card {
   height: 47.2%; /* Adjust height as needed */
   max-height: none;
+}
+
+.link{
+  text-decoration: none;
+  color: black;
 }
 
 /* Media query for devices with a maximum width of 960px (e.g., tablets and smaller laptops) */
