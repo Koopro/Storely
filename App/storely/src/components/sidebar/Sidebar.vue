@@ -26,7 +26,7 @@
             </router-link>
           </div>
           <div class="logout-button">
-            <v-btn @click="logout" class="logout-btn" outlined>
+            <v-btn @click="logout" class="logout-btn" :icon="'mdi mdi-logout' + (darkMode ? ' dark-icon' : '')" outlined>
               <v-icon :class="'mdi mdi-logout' + (darkMode ? ' dark-icon' : '')"></v-icon>
             </v-btn>
           </div>
@@ -78,7 +78,7 @@ export default {
       this.isExpanded = false;
     },
     logout() {
-      localStorage.clear();
+      localStorage.removeItem('authToken');
       location.reload();
     }
   }
