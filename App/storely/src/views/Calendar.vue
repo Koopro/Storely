@@ -22,7 +22,7 @@
 
 <script>
 import Sidebar from '../components/sidebar/Sidebar.vue';
-import Calendar from '../components/TestComponents/CalendarComponent.vue';
+import Calendar from '../components/calendar/CalendarComponent.vue';
 
 export default {
   components: {

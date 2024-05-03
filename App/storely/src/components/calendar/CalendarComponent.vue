@@ -303,7 +303,7 @@
     button {
         display: block;
         padding: 8px 15px;
-        background-color: #007bff;
+        background-color: #41474c;
         color: #fff;
         border: none;
         border-radius: 4px;
@@ -311,11 +311,11 @@
     }
     
     button:hover {
-        background-color: #0056b3;
+        background-color: #778390;
     }
     
     button:active {
-        background-color: #004499;
+        background-color: #778390;
     }
     
     .popup-overlay {

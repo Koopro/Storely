@@ -24,7 +24,7 @@
             <v-card-title class="text-h5">Calendar</v-card-title>
             </a>
             <v-card-text>
-              <!-- Calendar content here -->
+              <Calendar />
             </v-card-text>
           </v-card>
         </v-col>
@@ -49,11 +49,13 @@
 <script>
 import Sidebar from '../components/sidebar/Sidebar.vue';
 import Chat from '../components/TestComponents/ChatComponent.vue';
+import Calendar from '../components/calendar/CalendarComponent.vue';
 
 export default {
   components: {
     Sidebar,
     Chat,
+    Calendar,
   },
 };
 </script>
@@ -70,13 +72,13 @@ export default {
 
 /* Hide vertical scrollbar */
 .chat-card {
-  height: calc(100vh - 40px); /* Adjust height as needed */
+  height: auto; /* Adjust height as needed */
   max-height: none;
 }
 
 .todo-card,
 .calendar-card {
-  height: 47.2%; /* Adjust height as needed */
+  height: auto; /* Adjust height as needed */
   max-height: none;
 }
 
