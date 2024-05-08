@@ -5,8 +5,6 @@
     </div>
     <div v-else class="users-container">
       <div v-for="(friend, index) in friends" :key="index" class="chat-user" :class="{ 'active': friend === selectedUser }" @click="selectUser(friend)">
-        <v-avatar :src="getFriendPfp(friend)"></v-avatar>
-
         {{ displayFriendName(friend) }}
       </div>
     </div>
@@ -21,6 +19,8 @@
       <div v-else class="no-user-selected">Please select a user to chat.</div>
     </div>
   </div>
+
+
 </template>
 
 <script>
@@ -38,13 +38,9 @@ export default {
   async beforeMount() {
     await this.fetchFriends();
     await this.getUserInfo();
+    // Removed the call to this.getFriendPfp(); it should only be called with a valid friend object
   },
-  methods: {
-    getFriendPfp(friend) {
-      if (!this.getUser) return null;
-      const friendProfile = friend.requester._id === this.getUser._id ? friend.recipient : friend.requester;
-      return friendProfile.profileImageUrl ? `${process.env.VUE_APP_API_URL}${friendProfile.profileImageUrl}`: null;
-    },
+methods:{
     displayFriendName(friend) {
       return this.getUser && (friend.requester._id === this.getUser._id ? friend.recipient.name : friend.requester.name);
     },
@@ -68,6 +64,7 @@ export default {
           },
         });
         this.friends = response.data;
+        console.log(this.friends)
       } catch (error) {
         console.error('Error fetching friends:', error);
       }

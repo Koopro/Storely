@@ -3,7 +3,7 @@ the MongoDB Node.js driver. Here's a breakdown of what the code is doing: */
 const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
-const uri2 = process.env.MONGO_URI;
+const uri2 = process.env.MONGO_URI2;
 
 const dbConnectMongoose = () => {
   mongoose.connect(uri2, { useNewUrlParser: true, useUnifiedTopology: true })

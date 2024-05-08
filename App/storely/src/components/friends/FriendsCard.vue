@@ -5,7 +5,7 @@
         <v-tab key="users">Users</v-tab>
         <v-tab key="friends">Friends</v-tab>
         <v-tab key="requests">Friend Requests</v-tab>
-        <v-tab key="outgoing" disabled>Pending Sent Requests</v-tab>
+        <v-tab key="outgoing">Pending Sent Requests</v-tab>
       </v-tabs>
 
       <v-window v-model="tab">
@@ -96,32 +96,31 @@
         </v-window-item>
 
 
-        <!-- Outgoing Requests Tab -->
-        <v-window-item value="outgoing">
+        <v-window-item value="sent">
           <v-list dense>
-            <v-list-subheader class="text-h5 pa-2">Pending Sent Requests</v-list-subheader>
+            <v-list-subheader class="text-h5 pa-2">Sent Friend Requests</v-list-subheader>
             <v-divider></v-divider>
-            <template v-if="outgoingRequests.length > 0">
-              <v-list-item v-for="request in outgoingRequests" :key="request._id" class="user-item">
+            <template v-if="sentRequests.length > 0">
+              <v-list-item v-for="request in sentRequests" :key="request._id" class="user-item">
                 <v-avatar tile size="56">
-                  <v-icon large>mdi-account-clock</v-icon>
+                  <img :src="'https://api.storely.at'+request.recipient.profileImageUrl" alt="Requester's Profile Picture">
                 </v-avatar>
                 <v-list-item>
-                  <v-list-item-title class="headline">Awaiting {{ request.recipient.name }}'s response</v-list-item-title>
+                  <v-list-item-title class="headline">{{ request.recipient.name }} <v-icon color="orange">mdi-account-clock</v-icon></v-list-item-title>
                 </v-list-item>
               </v-list-item>
             </template>
             <v-list-item v-else>
               <v-list-item class="text-center">
-                No pending requests sent.
+                No sent friend requests.
               </v-list-item>
             </v-list-item>
           </v-list>
         </v-window-item>
 
+
       </v-window>
     </v-card>
-
     <!-- Snackbar Notification -->
     <v-snackbar v-model="showAlert" :color="alertColor" :timeout="4000" bottom right>
       {{ alertText }}
@@ -138,6 +137,7 @@ export default {
     users: [],
     friends: [],
     friendRequests: [],
+    sentRequests: [],
     apiUrl: `${process.env.VUE_APP_API_URL}/api`,
     authToken: `Bearer ${localStorage.getItem('authToken')}`,
     showAlert: false,
@@ -187,6 +187,33 @@ export default {
       }
     },
 
+    // Inside your Vue component's methods object
+
+    async fetchSentRequests() {
+      try {
+        const response = await fetch(`${this.apiUrl}/friends/sentrequests`, {
+          method: 'GET',
+          headers: {
+            'Authorization': this.authToken
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch sent friend requests');
+        }
+        const result = await response.json();  // Get the full JSON response
+        this.sentRequests = result.data;       // Assign the data part to your state
+        console.log("Fetched sent requests:", this.sentRequests);
+      } catch (error) {
+        console.error('Error fetching sent friend requests:', error);
+        this.showAlertWithMessage('Failed to fetch sent friend requests', 'error');
+      }
+    },
+
+
+
+
+// Add this to your created or mounted lifecycle hook to fetch when the component loads
+
 
 
 
@@ -202,6 +229,8 @@ export default {
           body: JSON.stringify({ recipientId: friendId })
         });
         const result = await response.json();
+
+
         if (!response.ok) {
           throw new Error(result.message);
         }
@@ -222,6 +251,7 @@ export default {
           headers: {'Authorization': this.authToken}
         });
         this.friends = await response.json();
+        console.log("Fetched friends:", this.friends);
       } catch (error) {
         this.showAlertWithMessage('Failed to fetch friends', 'error');
       }
@@ -279,8 +309,10 @@ export default {
     this.fetchUsers();
     this.fetchFriends();
     this.fetchFriendRequests();
+    this.fetchSentRequests(); // Fetch sent requests on component creation
     this.getUserInfo();
   },
+
   mounted() {
     this.fetchUsers();
     this.getUserInfo();
@@ -289,6 +321,14 @@ export default {
 </script>
 
 <style scoped>
+v-btn{
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+.v-btn--variant-elevated {
+  box-shadow: none;
+}
 .container {
   max-width: 1000px; /* Limiting the width for better focus */
   heigth: 50vh;

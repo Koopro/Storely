@@ -12,7 +12,7 @@ const adminMiddleware = async (req, res, next) => {
     }
     console.log('User role:', user.role);
 
-    if (user.role !== 'admin' || user.role !== 'owner' || user.role !== 'root') {
+    if (user.role !== 'admin') {
       return res.status(403).send('Access denied. Admins only.');
     }
 

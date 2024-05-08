@@ -1,4 +1,5 @@
 const List = require('../models/List');
+const User = require('../models/User');
 const cors = require('cors');
 
 exports.listspost = async (req, res) => {
@@ -34,7 +35,8 @@ exports.listsget = async (req, res) => {
 };
 
 exports.listid = async (req, res) => {
-    const userId = req.userData.user._id; // Ensure user is authenticated
+    const userId = req.userData.userId; // Correct access based on your middleware
+    // Ensure user is authenticated
     const listId = req.params.id;
 
     try {

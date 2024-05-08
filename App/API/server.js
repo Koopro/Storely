@@ -6,11 +6,10 @@ const authRoutes = require("./routes/authRoutes");
 const userProfileRoutes = require("./routes/UserProfile");
 const socketAuthMiddleware = require("./middleware/socketAuthMiddleware");
 const { dbConnectMongoose, dbConnectMongoClient } = require("./db");
-const { updateUserStatus } = require("./utils/userStatus"); // Adjust the path as necessary
-//const genSiteRoutes = require('./genSite'); // Adjust the path as needed
-//const apiKeyMiddleware = require('./middleware/apiKeyMiddleware');
+const { updateUserStatus } = require("./utils/userStatus");
 const friendRoutes = require('./routes/friendRoutes');
 const todoRoutes = require('./routes/todoRoutes');
+const morgan = require('morgan');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,37 +18,41 @@ const PORT = process.env.PORT || 3000;
 const server = require("http").createServer(app);
 
 // Passing the server to socket.io
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-  },
+// Server-side CORS configuration for Express and Socket.IO
+const corsOptions = {
+  origin: "http://localhost:8080", // or '*' for all origins
+  methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
+const io = require('socket.io')(server, {
+  cors: corsOptions
 });
 
-// Middleware
-app.use(cors({
-  origin: "*"
-}));
+
 app.use(express.json());
-//app.use(express.urlencoded({ extended: true }));
-//app.use('/api/', apiKeyMiddleware);  
-//app.use('/gen', genSiteRoutes);
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev')); // Log requests to the console.
+
+// Route handlers
 app.use("/api", authRoutes);
 app.use("/api", userProfileRoutes);
 app.use("/api/friends", friendRoutes);
-app.use("/api/todo", todoRoutes)
-
+app.use("/api/todo", todoRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
 app.use(express.static(path.join(__dirname, "public")));
 
 // Database Connection
 dbConnectMongoose();
 dbConnectMongoClient();
 
+// Socket.IO middleware and configuration
 io.use(socketAuthMiddleware);
-
-// Apply the middleware to all incoming Socket.IO connections
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}, User ID: ${socket.userId}`);
 
@@ -59,15 +62,19 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}, User ID: ${socket.userId}`);
     // Update user status to 'offline' upon disconnection
-    updateUserStatus(socket.userId, "offline").catch((err) =>
-      console.error(err)
-    );
+    updateUserStatus(socket.userId, "offline").catch((err) => console.error(err));
   });
 
   socket.on("updateStatus", (status) => {
-    // This allows for manual status updates, e.g., setting to 'away'
+    // This allows for manual status updates
     updateUserStatus(socket.userId, status).catch((err) => console.error(err));
   });
+});
+
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 // Use server.listen instead of app.listen to start the server with Socket.IO integration

@@ -6,21 +6,23 @@ exports.listAllUsers = async (req, res) => {
         // Get the current user's ID from auth middleware or session
         const userId = req.userData.userId;
 
-        // Find all friendships for the current user
-        const friends = await Friendship.find({
+        // Find all relationships (friendships and pending requests) involving the current user
+        const relationships = await Friendship.find({
             $or: [{ requester: userId }, { recipient: userId }],
-            status: 'accepted' // Assuming you also want to exclude pending, add it to the condition
+            status: { $in: ['accepted', 'requested', 'blocked'] } // Include 'blocked' if you manage such a status
         });
 
-        // Extract user IDs from these friendships
-        const friendIds = friends.map(friend =>
-            friend.requester.toString() === userId ? friend.recipient : friend.requester
+        // Extract user IDs from these relationships
+        const excludedIds = relationships.map(rel =>
+            rel.requester.toString() === userId ? rel.recipient : rel.requester
         );
+        // Add the current user's ID to the list to exclude them as well
+        excludedIds.push(userId);
 
-        // Fetch all users except the current user and their friends
+        // Find all users excluding those in the relationships
         const users = await User.find({
-            _id: { $nin: [...friendIds, userId] }
-        }).select('-password'); // Exclude sensitive data
+            _id: { $nin: excludedIds }
+        }).select('-password'); // Exclude sensitive data such as passwords
 
         res.json(users);
     } catch (error) {

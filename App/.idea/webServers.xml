@@ -3,7 +3,7 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="650f72e0-2554-49dd-a225-eb59ed41e8b9" name="Storely">
-        <fileTransfer accessType="SFTP" host="45.145.224.59" port="22" sshConfigId="1cc04fc2-bd52-4218-b7df-75547fe508fc" sshConfig="root@45.145.224.59:22 key" keyPair="true">
+        <fileTransfer accessType="SFTP" host="45.145.224.59" port="22" sshConfigId="e5d06c28-6f09-4483-b674-95833c560371" sshConfig="root@45.145.224.59:22 key" keyPair="true">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
