@@ -1,4 +1,4 @@
-  <template>
+<template>
   <Sidebar @click="handleDarkMode" />
   <div class="top" :class="{ 'dark-top': isDarkMode }">
     <Clock class="clock" :class="{ 'clock-dark': isDarkMode }"/>
@@ -7,10 +7,11 @@
     <div class="inner-menu">
       <ul>
         <!-- Automatisch Listenpunkte generieren basierend auf verfügbaren Listen -->
-        <li v-for="list in lists" :key="list._id" :style="{ backgroundColor: list.color }">
+        <li v-for="list in lists" :key="list._id" :style="{ backgroundColor: list.color, color: list.isDarkText ? 'white' : 'black' }">
           {{ list.name }}
           <i class="fas fa-trash" :class="{ 'fas fa-trash-dark': isDarkMode }" @click="promptDelete(list._id, list.password)"></i>
         </li>
+
       </ul>
     </div>
     <button class="add-list-button" :class="{ 'add-list-button-dark': isDarkMode }" @click="openPopup">Liste Hinzufügen</button>
@@ -31,7 +32,6 @@
 
   <!--ToDo-->
   <div class="ToDo" :class="{ 'ToDo-Dark': isDarkMode }">
-    <ToDo />
     <button class="add-todo-button" :class="{ 'add-todo-button-DARK': isDarkMode }">ToDo Hinzufügen</button>
   </div>
 
@@ -41,13 +41,11 @@
 import axios from 'axios';
 import Sidebar from '../sidebar/Sidebar.vue';
 import Clock from './Clock.vue';
-import ToDo from './ToDos.vue';
 
 export default {
   components: {
     Sidebar, 
     Clock, 
-    ToDo
   },
   data() {
   return {
@@ -79,9 +77,17 @@ export default {
     handleError(error) {
       console.error("Ein Fehler ist aufgetreten:", error);
     },
+    
     async addList() {
       const listName = this.$refs.listNameInput.value.trim();
       const listColor = this.listColor;
+      
+      // Überprüfe, ob der Name bereits existiert
+      if (this.lists.some(list => list.name === listName)) {
+        alert("Der Listenname existiert bereits.");
+        return; // Beende die Methode, um das Hinzufügen der Liste zu verhindern
+      }
+      
       if (listName === "") {
         alert("Bitte gib einen Listennamen ein.");
       } else {
@@ -95,15 +101,27 @@ export default {
             headers: { 'Authorization': this.authToken }
           });
 
+          // Füge die Liste hinzu
           this.lists.push(response.data);
+          
+          // Überprüfe die Helligkeit des Hintergrunds und aktualisiere die Schriftfarbe entsprechend
+          const isDarkText = this.isDarkBackground(listColor);
+          // Füge ein Attribut zum Listenobjekt hinzu, um den Schriftfarbmodus zu speichern
+          response.data.isDarkText = isDarkText;
+
+          // Setze den Input auf leer und den Farbpicker zurück
           this.$refs.listNameInput.value = "";
-          this.listColor = "#ffffff";  // Reset auf Standardfarbe
+          this.listColor = "#ffffff";
+
+          // Schließe das Popup
           this.closePopup();
         } catch (error) {
           this.handleError(error.message);
         }
       }
     },
+
+
 
     async fetchLists() {
       try {
@@ -135,6 +153,24 @@ export default {
         console.log(error)
       }
     },
+    isDarkBackground(color) {
+    // Erzeuge ein unsichtbares HTML-Element, um die Farbe zu analysieren
+    let span = document.createElement("span");
+    span.style.color = color;
+    span.style.display = "none";
+    document.body.appendChild(span);
+
+    // Berechne die Helligkeit des Hintergrunds
+    let backgroundColor = window.getComputedStyle(span).color;
+    let rgb = backgroundColor.match(/\d+/g).map(Number);
+    let brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+
+    // Entferne das unsichtbare HTML-Element
+    document.body.removeChild(span);
+
+    // Wenn die Helligkeit unter einem Schwellenwert liegt, ist die Farbe dunkel
+    return brightness < 128;
+  },
     closePopup() {
       document.querySelector('.popup-list-wrap').style.display = 'none';
       document.querySelector('.popup-background').style.display = 'none';
