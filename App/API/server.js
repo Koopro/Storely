@@ -9,7 +9,9 @@ const { dbConnectMongoose, dbConnectMongoClient } = require("./db");
 const { updateUserStatus } = require("./utils/userStatus");
 const friendRoutes = require('./routes/friendRoutes');
 const todoRoutes = require('./routes/todoRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const morgan = require('morgan');
+const { saveMessage } = require('./controllers/chatController');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,7 +35,6 @@ const io = require('socket.io')(server, {
   cors: corsOptions
 });
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Log requests to the console.
@@ -43,6 +44,7 @@ app.use("/api", authRoutes);
 app.use("/api", userProfileRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api/todo", todoRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.static(path.join(__dirname, "public")));
@@ -58,6 +60,17 @@ io.on("connection", (socket) => {
 
   // Update user status to 'online' upon connection
   updateUserStatus(socket.userId, "online").catch((err) => console.error(err));
+
+  socket.on('chatMessage', async (messageData) => {
+    try {
+      // Save the message to the database
+      const savedMessage = await saveMessage(messageData);
+      // Emit the message to the recipient
+      io.to(messageData.recipient).emit('chatMessage', savedMessage);
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+    }
+  });
 
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}, User ID: ${socket.userId}`);

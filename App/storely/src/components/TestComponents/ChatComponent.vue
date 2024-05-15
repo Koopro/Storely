@@ -11,7 +11,7 @@
     <div class="chat-content">
       <div v-if="selectedUser" class="chat-messages" ref="chatMessages">
         <div v-for="(message, index) in selectedUser.messages" :key="index" class="message">
-          <div class="message-sender">{{ message.sender }}</div>
+          <div class="message-sender">{{ message.sender?.name || 'Unknown' }}</div>
           <div class="message-text">{{ message.text }}</div>
         </div>
       </div>
@@ -19,15 +19,16 @@
       <div v-else class="no-user-selected">Please select a user to chat.</div>
     </div>
   </div>
-
-
 </template>
 
 <script>
 import axios from 'axios';
+import io from 'socket.io-client';
+
 export default {
   data() {
     return {
+      socket: null,
       selectedUser: null,
       newMessage: '',
       friends: [],
@@ -38,9 +39,30 @@ export default {
   async beforeMount() {
     await this.fetchFriends();
     await this.getUserInfo();
-    // Removed the call to this.getFriendPfp(); it should only be called with a valid friend object
+    this.initializeSocket();
   },
-methods:{
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+  },
+  methods: {
+    initializeSocket() {
+      // Initialize Socket connection
+      this.socket = io('https://api.storely.at', { // Ensure this is your server address
+        query: { token: localStorage.getItem('authToken') }
+      });
+
+      this.socket.on('chatMessage', (message) => {
+        if (this.selectedUser && message.conversationId === this.selectedUser.conversationId) {
+          this.selectedUser.messages.push(message);
+          this.$nextTick(this.scrollToBottom);
+        }
+      });
+
+      this.socket.on('connect', () => console.log('Connected to WebSocket server'));
+      this.socket.on('disconnect', () => console.log('Disconnected from WebSocket server'));
+    },
     displayFriendName(friend) {
       return this.getUser && (friend.requester._id === this.getUser._id ? friend.recipient.name : friend.requester.name);
     },
@@ -64,26 +86,54 @@ methods:{
           },
         });
         this.friends = response.data;
-        console.log(this.friends)
       } catch (error) {
         console.error('Error fetching friends:', error);
       }
     },
     selectUser(user) {
-      this.selectedUser = user;
-      this.$nextTick(this.scrollToBottom);
+      if (!user.conversationId) {
+        user.conversationId = this.generateConversationId(this.getUser._id, user._id);
+      }
+      this.selectedUser = { ...user, messages: [] };
+      this.fetchMessages(user.conversationId);
+    },
+    generateConversationId(userId1, userId2) {
+      return [userId1, userId2].sort().join('-');
     },
     sendMessage() {
       if (!this.selectedUser || !this.newMessage.trim()) return;
-      this.selectedUser.messages.push({
-        sender: 'You',
-        text: this.newMessage
-      });
+      const messageData = {
+        conversationId: this.generateConversationId(this.getUser._id, this.selectedUser._id),
+        sender: this.getUser._id,
+        recipient: this.selectedUser._id,
+        text: this.newMessage,
+        timestamp: new Date()
+      };
+      this.socket.emit('chatMessage', messageData);
+      this.addMessageToChat({ ...messageData, sender: { _id: this.getUser._id, name: 'You' } });
       this.newMessage = '';
-      this.scrollToBottom();
+    },
+    addMessageToChat(message) {
+      if (!this.selectedUser.messages) {
+        this.selectedUser.messages = [];
+      }
+      this.selectedUser.messages.push(message);
+      this.$nextTick(this.scrollToBottom);
     },
     scrollToBottom() {
-      this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
+      const chatMessages = this.$refs.chatMessages;
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    },
+    fetchMessages(conversationId) {
+      axios.get(`${process.env.VUE_APP_API_URL}/api/chat/history/${conversationId}`, {
+        headers: { 'Authorization': this.authToken }
+      }).then(response => {
+        this.selectedUser.messages = response.data;
+      }).catch(error => {
+        console.error('Error fetching messages:', error);
+      });
     },
   }
 };
@@ -91,7 +141,7 @@ methods:{
 
 <style scoped>
 /* Styles for the user list */
-.no-friends{
+.no-friends {
   width: auto;
   max-width: 250px;
   padding-left: 10px;
@@ -196,5 +246,4 @@ methods:{
     max-width: 100px;
   }
 }
-
 </style>
