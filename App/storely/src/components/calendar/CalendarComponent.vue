@@ -42,12 +42,15 @@
       <div v-if="selectedEvent" class="popup-overlay" @click="closeEventPopupOutside">
         <div class="popup" ref="eventPopup">
           <h2>Events on {{ selectedEvent[0].date }}</h2>
+          <br>
           <ul>
             <li v-for="event in selectedEvent" :key="event.name">
               <strong>{{ event.name }}</strong>
               <br v-if="event.formattedTime || event.formattedLocation">
               <span v-if="event.formattedTime"><strong>Time: </strong>{{ event.formattedTime }}</span>
-              <br><span v-if="event.formattedLocation"><strong>Location: </strong>{{ event.formattedLocation }}</span>
+              <br><span v-if="event.formattedLocation"><strong>Location: </strong>{{ event.formattedLocation }}</span><br>
+              <!-- Button für den Event Delete -->
+              <span @click="deleteEvent(event)" class="mdi mdi-trash-can-outline" style="cursor: pointer"></span>
             </li>
           </ul>
         </div>
@@ -148,10 +151,11 @@
         this.selectedEvent = null;
       },
       closeEventPopupOutside(event) {
-        if (!this.$refs.eventPopup.contains(event.target)) {
+        if (this.selectedEvent && this.$refs.eventPopup && !this.$refs.eventPopup.contains(event.target)) {
           this.selectedEvent = null;
         }
       },
+
       formatDate(year, month, day) {
         const paddedMonth = month < 9 ? `0${month + 1}` : `${month + 1}`;
         const paddedDay = day < 10 ? `0${day}` : `${day}`;
@@ -193,6 +197,16 @@
           this.resetForm();
           this.closeAddEventPopup();
         }
+      },
+      deleteEvent(eventToDelete) {
+        console.log('Deleting event:', eventToDelete);
+        console.log('Events before deletion:', this.events);
+
+        this.events = this.events.filter(event => event !== eventToDelete);
+
+        console.log('Events after deletion:', this.events);
+
+        this.selectedEvent = null; // Schließen Sie das Popup nach dem Löschen des Ereignisses
       },
       resetForm() {
         this.newEvent.date = '';
@@ -358,5 +372,10 @@
     
     .checkbox-wrapper input[type="checkbox"] {
         margin-right: 5px; /* Abstand zwischen dem Kontrollkästchen und dem Text */
+    }
+
+    .mdi{
+      font-size: 24px;
+      color: red;
     }
     </style> 
