@@ -11,7 +11,7 @@
     <div class="chat-content">
       <div v-if="selectedUser" class="chat-messages" ref="chatMessages">
         <div v-for="(message, index) in selectedUser.messages" :key="index" class="message">
-          <div class="message-sender">{{ message.from.name }}</div>
+          <div class="message-sender">{{ message.sender?.name || 'Unknown' }}</div>
           <div class="message-text">{{ message.text }}</div>
         </div>
       </div>
@@ -19,8 +19,6 @@
       <div v-else class="no-user-selected">Please select a user to chat.</div>
     </div>
   </div>
-
-
 </template>
 
 <script>
@@ -43,7 +41,7 @@ export default {
     await this.getUserInfo();
     this.initializeSocket();
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.socket) {
       this.socket.disconnect();
     }
@@ -55,7 +53,7 @@ export default {
         query: { token: localStorage.getItem('authToken') }
       });
 
-      this.socket.on('newMessage', (message) => {
+      this.socket.on('chatMessage', (message) => {
         if (this.selectedUser && message.conversationId === this.selectedUser.conversationId) {
           this.selectedUser.messages.push(message);
           this.$nextTick(this.scrollToBottom);
@@ -88,20 +86,17 @@ export default {
           },
         });
         this.friends = response.data;
-        console.log(this.friends)
       } catch (error) {
         console.error('Error fetching friends:', error);
       }
     },
     selectUser(user) {
       if (!user.conversationId) {
-        console.error('No conversationId available for the selected user.');
-        return;
+        user.conversationId = this.generateConversationId(this.getUser._id, user._id);
       }
-      this.selectedUser = user;
+      this.selectedUser = { ...user, messages: [] };
       this.fetchMessages(user.conversationId);
     },
-
     generateConversationId(userId1, userId2) {
       return [userId1, userId2].sort().join('-');
     },
@@ -109,23 +104,18 @@ export default {
       if (!this.selectedUser || !this.newMessage.trim()) return;
       const messageData = {
         conversationId: this.generateConversationId(this.getUser._id, this.selectedUser._id),
-        from: this.getUser._id,
-        to: this.selectedUser._id,
-        text: this.newMessage
-      };
-      this.socket.emit('sendPrivateMessage', messageData);
-      this.addMessageToChat({
-        sender: 'You',
+        sender: this.getUser._id,
+        recipient: this.selectedUser._id,
         text: this.newMessage,
-        from: this.getUser._id,
-        to: this.selectedUser._id
-      });
+        timestamp: new Date()
+      };
+      this.socket.emit('chatMessage', messageData);
+      this.addMessageToChat({ ...messageData, sender: { _id: this.getUser._id, name: 'You' } });
       this.newMessage = '';
-      this.scrollToBottom();
     },
     addMessageToChat(message) {
       if (!this.selectedUser.messages) {
-        this.$set(this.selectedUser, 'messages', []);
+        this.selectedUser.messages = [];
       }
       this.selectedUser.messages.push(message);
       this.$nextTick(this.scrollToBottom);
@@ -136,11 +126,8 @@ export default {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
     },
-
-
-
     fetchMessages(conversationId) {
-      axios.get(`http://localhost:3000/api/messages/${conversationId}`, {
+      axios.get(`http://localhost:3000/api/chat/history/${conversationId}`, {
         headers: { 'Authorization': this.authToken }
       }).then(response => {
         this.selectedUser.messages = response.data;
@@ -148,14 +135,13 @@ export default {
         console.error('Error fetching messages:', error);
       });
     },
-
   }
 };
 </script>
 
 <style scoped>
 /* Styles for the user list */
-.no-friends{
+.no-friends {
   width: auto;
   max-width: 250px;
   padding-left: 10px;
@@ -260,5 +246,4 @@ export default {
     max-width: 100px;
   }
 }
-
 </style>
