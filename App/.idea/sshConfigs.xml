@@ -2,7 +2,7 @@
 <project version="4">
   <component name="SshConfigs">
     <configs>
-      <sshConfig host="45.145.224.59" id="1cc04fc2-bd52-4218-b7df-75547fe508fc" keyPath="C:\Users\chris\.ssh\id_putty" port="22" nameFormat="DESCRIPTIVE" username="root" useOpenSSHConfig="true" />
+      <sshConfig host="45.145.224.59" id="e5d06c28-6f09-4483-b674-95833c560371" keyPath="C:\Users\chris\.ssh\id_storely" port="22" nameFormat="DESCRIPTIVE" username="root" useOpenSSHConfig="false" />
     </configs>
   </component>
 </project>

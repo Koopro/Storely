@@ -49,7 +49,7 @@ export default {
   methods: {
     initializeSocket() {
       // Initialize Socket connection
-      this.socket = io('http://localhost:3000', { // Ensure this is your server address
+      this.socket = io('https://api.storely.at', { // Ensure this is your server address
         query: { token: localStorage.getItem('authToken') }
       });
 
@@ -127,7 +127,7 @@ export default {
       }
     },
     fetchMessages(conversationId) {
-      axios.get(`http://localhost:3000/api/chat/history/${conversationId}`, {
+      axios.get(`${process.env.VUE_APP_API_URL}/api/chat/history/${conversationId}`, {
         headers: { 'Authorization': this.authToken }
       }).then(response => {
         this.selectedUser.messages = response.data;
