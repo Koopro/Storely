@@ -19,11 +19,11 @@
                 <v-avatar>
                   <img :src="'https://api.storely.at' + user.profileImageUrl" alt="User's Profile Picture">
                 </v-avatar>
-                <v-list-item>
+                <v-list-item id="nameUser">
                   <v-list-item-title class="headline">{{ user.name }}</v-list-item-title>
                   <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
                 </v-list-item>
-                <v-list-item-action>
+                <v-list-item-action id="addFriend">
                   <v-btn icon @click="addFriend(user._id)">
                     <v-icon color="green">mdi-account-plus</v-icon>
                   </v-btn>
@@ -50,12 +50,12 @@
                   <img :src="getFriendPfp(friend)" alt="Friend's Profile Picture">
                 </v-avatar>
                 <v-list-item-content>
-                  <v-list-item-title class="headline">
+                  <v-list-item-title class="headline" id="nameFriend">
                     {{ friend.requester._id === getUser._id ? friend.recipient.name : friend.requester.name }}
                   </v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action>
-                  <v-btn icon @click="removeFriend(friend._id)">
+                  <v-btn icon @click="removeFriend(friend._id)" id="removeFriend">
                     <v-icon color="red">mdi-account-remove</v-icon>
                   </v-btn>
                 </v-list-item-action>
@@ -105,7 +105,7 @@
                 <v-avatar tile size="56">
                   <img :src="'https://api.storely.at'+request.recipient.profileImageUrl" alt="Requester's Profile Picture">
                 </v-avatar>
-                <v-list-item>
+                <v-list-item id="namePending">
                   <v-list-item-title class="headline">{{ request.recipient.name }} <v-icon color="orange">mdi-account-clock</v-icon></v-list-item-title>
                 </v-list-item>
               </v-list-item>
@@ -331,8 +331,8 @@ v-btn{
 }
 .container {
   max-width: 1000px; /* Limiting the width for better focus */
-  heigth: 50vh;
-  margin: auto; /* Centering the card in the container */
+  height: 50vh;
+  margin: auto; /* Centering the card in the container */ 
 }
 
 .card {
@@ -380,4 +380,32 @@ v-list-item:hover {
 v-snackbar {
   border-radius: 5px; /* Rounded corners for the snackbar */
 }
+
+#nameUser{
+  margin-left: 50px;
+  margin-top: -40px;
+  max-width: 500px;
+}
+
+#nameFriend{
+  margin-left: 80px;
+  margin-top: -40px;
+  max-width: 200px;
+}
+
+#addFriend{
+  margin-left: 400px;
+  margin-top: -40px;
+}
+
+#removeFriend{
+  margin-left: 300px;
+  margin-top: -40px;
+}
+
+#namePending{
+  margin-left: 80px;
+  margin-top: -50px;
+}
+
 </style>
