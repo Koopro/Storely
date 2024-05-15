@@ -136,7 +136,8 @@ export default {
         message: '',
       },
     };
-  },  created() {
+  },
+  created() {
     this.fetchUserProfile();
   },
   methods: {

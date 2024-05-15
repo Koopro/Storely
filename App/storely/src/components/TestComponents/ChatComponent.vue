@@ -11,7 +11,7 @@
     <div class="chat-content">
       <div v-if="selectedUser" class="chat-messages" ref="chatMessages">
         <div v-for="(message, index) in selectedUser.messages" :key="index" class="message">
-          <div class="message-sender">{{ message.sender }}</div>
+          <div class="message-sender">{{ message.from.name }}</div>
           <div class="message-text">{{ message.text }}</div>
         </div>
       </div>
@@ -25,9 +25,12 @@
 
 <script>
 import axios from 'axios';
+import io from 'socket.io-client';
+
 export default {
   data() {
     return {
+      socket: null,
       selectedUser: null,
       newMessage: '',
       friends: [],
@@ -38,9 +41,30 @@ export default {
   async beforeMount() {
     await this.fetchFriends();
     await this.getUserInfo();
-    // Removed the call to this.getFriendPfp(); it should only be called with a valid friend object
+    this.initializeSocket();
   },
-methods:{
+  beforeDestroy() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+  },
+  methods: {
+    initializeSocket() {
+      // Initialize Socket connection
+      this.socket = io('http://localhost:3000', { // Ensure this is your server address
+        query: { token: localStorage.getItem('authToken') }
+      });
+
+      this.socket.on('newMessage', (message) => {
+        if (this.selectedUser && message.conversationId === this.selectedUser.conversationId) {
+          this.selectedUser.messages.push(message);
+          this.$nextTick(this.scrollToBottom);
+        }
+      });
+
+      this.socket.on('connect', () => console.log('Connected to WebSocket server'));
+      this.socket.on('disconnect', () => console.log('Disconnected from WebSocket server'));
+    },
     displayFriendName(friend) {
       return this.getUser && (friend.requester._id === this.getUser._id ? friend.recipient.name : friend.requester.name);
     },
@@ -70,21 +94,61 @@ methods:{
       }
     },
     selectUser(user) {
+      if (!user.conversationId) {
+        console.error('No conversationId available for the selected user.');
+        return;
+      }
       this.selectedUser = user;
-      this.$nextTick(this.scrollToBottom);
+      this.fetchMessages(user.conversationId);
+    },
+
+    generateConversationId(userId1, userId2) {
+      return [userId1, userId2].sort().join('-');
     },
     sendMessage() {
       if (!this.selectedUser || !this.newMessage.trim()) return;
-      this.selectedUser.messages.push({
-        sender: 'You',
+      const messageData = {
+        conversationId: this.generateConversationId(this.getUser._id, this.selectedUser._id),
+        from: this.getUser._id,
+        to: this.selectedUser._id,
         text: this.newMessage
+      };
+      this.socket.emit('sendPrivateMessage', messageData);
+      this.addMessageToChat({
+        sender: 'You',
+        text: this.newMessage,
+        from: this.getUser._id,
+        to: this.selectedUser._id
       });
       this.newMessage = '';
       this.scrollToBottom();
     },
-    scrollToBottom() {
-      this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
+    addMessageToChat(message) {
+      if (!this.selectedUser.messages) {
+        this.$set(this.selectedUser, 'messages', []);
+      }
+      this.selectedUser.messages.push(message);
+      this.$nextTick(this.scrollToBottom);
     },
+    scrollToBottom() {
+      const chatMessages = this.$refs.chatMessages;
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    },
+
+
+
+    fetchMessages(conversationId) {
+      axios.get(`http://localhost:3000/api/messages/${conversationId}`, {
+        headers: { 'Authorization': this.authToken }
+      }).then(response => {
+        this.selectedUser.messages = response.data;
+      }).catch(error => {
+        console.error('Error fetching messages:', error);
+      });
+    },
+
   }
 };
 </script>

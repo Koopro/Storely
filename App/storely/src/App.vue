@@ -1,7 +1,7 @@
 <template>
   <v-app :class="{'dark-mode': darkMode}">
     <div id="app">
-      <router-view />
+      <router-view/>
     </div>
   </v-app>
 </template>
@@ -19,6 +19,7 @@ export default {
       currentUserStatus: 'offline', // Track the current status of the user
       darkMode: false,
       darkModeCheckInterval: null,
+      latestData: null, // Add a new state to store the latest data
     };
   },
 
@@ -38,12 +39,12 @@ export default {
   },
   methods: {
     checkDarkMode() {
-    const storedDarkMode = localStorage.getItem('darkMode');
-    const currentDarkMode = storedDarkMode ? JSON.parse(storedDarkMode) : false;
-    if (this.darkMode !== currentDarkMode) {
-      this.darkMode = currentDarkMode;
-    }
-  },
+      const storedDarkMode = localStorage.getItem('darkMode');
+      const currentDarkMode = storedDarkMode ? JSON.parse(storedDarkMode) : false;
+      if (this.darkMode !== currentDarkMode) {
+        this.darkMode = currentDarkMode;
+      }
+    },
     setupInactivityDetection() {
       const resetTimer = () => {
         clearTimeout(this.inactivityTimer);
@@ -98,6 +99,12 @@ export default {
         // Ensure the user is marked online upon connecting
         this.updateUserStatus('online');
       });
+
+      // Listen for new data
+      this.socket.on('newData', (data) => {
+        this.latestData = data; // Update the component's state with the new data
+        console.log('Received new data:', data);
+      });
     },
   },
 };
@@ -121,4 +128,3 @@ export default {
   width: 100%;
 }
 </style>
-

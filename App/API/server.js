@@ -33,6 +33,7 @@ const io = require('socket.io')(server, {
   cors: corsOptions
 });
 
+chat(io);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
