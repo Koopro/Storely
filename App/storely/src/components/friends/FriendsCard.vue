@@ -14,7 +14,7 @@
           <v-list dense subheader>
             <v-list-subheader class="text-h5 pa-2">All Users</v-list-subheader>
             <v-divider></v-divider>
-            <template v-if="users.length > 0">
+            <template v-if="users && users.length > 0">
               <v-list-item v-for="user in users" :key="user._id" two-line>
                 <v-avatar>
                   <img :src="'https://api.storely.at' + user.profileImageUrl" alt="User's Profile Picture">
@@ -37,13 +37,11 @@
             </v-list-item>
           </v-list>
         </v-window-item>
-
-        <!-- Friends Tab -->
         <v-window-item value="friends">
           <v-list dense>
             <v-list-subheader class="text-h5 pa-2">My Friends</v-list-subheader>
             <v-divider></v-divider>
-            <template v-if="friends.length > 0">
+            <template v-if="friends && friends.length > 0">
               <v-list-item v-for="friend in friends" :key="friend._id" two-line>
                 <v-avatar tile size="56">
                   <img :src="getFriendPfp(friend)" alt="Friend's Profile Picture">
@@ -73,13 +71,13 @@
           <v-list dense>
             <v-list-subheader class="text-h5 pa-2">Friend Requests</v-list-subheader>
             <v-divider></v-divider>
-            <template v-if="friendRequests.length > 0">
+            <template v-if="friendRequests && friendRequests.length > 0">
               <v-list-item v-for="request in friendRequests" :key="request._id" class="user-item">
                 <v-avatar tile size="56">
                   <img :src="'https://api.storely.at' + request.requester.profileImageUrl" alt="Requester's Profile Picture">
                 </v-avatar>
                 <v-list-item-content>
-                  <v-list-item-title class="headline">{{ request.requester?.name }} wants to connect</v-list-item-title>
+                  <v-list-item-title class="headline">{{ request.requester.name }} wants to connect</v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action>
                   <v-btn icon @click="acceptFriend(request._id)">
@@ -101,7 +99,7 @@
           <v-list dense>
             <v-list-subheader class="text-h5 pa-2">Sent Friend Requests</v-list-subheader>
             <v-divider></v-divider>
-            <template v-if="sentRequests.length > 0">
+            <template v-if="sentRequests && sentRequests.length > 0">
               <v-list-item v-for="request in sentRequests" :key="request._id" class="user-item">
                 <v-avatar tile size="56">
                   <img :src="'https://api.storely.at' + request.recipient.profileImageUrl" alt="Recipient's Profile Picture">
@@ -134,7 +132,7 @@ export default {
     tab: 'users',
     users: [],
     friends: [],
-    friendRequests: [],
+    friendRequests: [],  // Ensure this is initialized as an empty array
     sentRequests: [],
     apiUrl: `${process.env.VUE_APP_API_URL}/api`,
     authToken: `Bearer ${localStorage.getItem('authToken')}`,
@@ -209,7 +207,7 @@ export default {
             'Authorization': this.authToken,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({recipientId: friendId})
+          body: JSON.stringify({ recipientId: friendId })
         });
         const result = await response.json();
 
@@ -222,18 +220,30 @@ export default {
         this.showAlertWithMessage(error.message, 'error');
       }
     },
-
     async fetchFriends() {
       try {
         const response = await fetch(`${this.apiUrl}/friends/list`, {
           method: 'GET',
-          headers: {'Authorization': this.authToken}
+          headers: { 'Authorization': this.authToken }
         });
         const result = await response.json();
-        this.friends = result.data;
-        console.log("Fetched friends:", this.friends);
+        console.log("Fetched friends data:", result); // Log the entire result for debugging
+
+        if (!response.ok) {
+          throw new Error(result.message);
+        }
+
+        // Ensure that 'data' exists in the result
+        if (result) {
+          this.friends = result; // Assign data to this.friends
+          console.log("Assigned friends:", this.friends); // Log the assigned data
+        } else {
+          console.error("No data found in response:", result);
+        }
+
       } catch (error) {
         this.showAlertWithMessage('Failed to fetch friends', 'error');
+        console.error('Error fetching friends:', error);
       }
     },
 
@@ -241,11 +251,16 @@ export default {
       try {
         const response = await fetch(`${this.apiUrl}/friends/pending`, {
           method: 'GET',
-          headers: {'Authorization': this.authToken}
+          headers: { 'Authorization': this.authToken }
         });
         const result = await response.json();
-        this.friendRequests = result.data;
+        if (!response.ok) {
+          throw new Error(result.message);
+        }
+        this.friendRequests = result.data;  // Assign the data part of the response
+        console.log("Fetched friend requests:", this.friendRequests);  // Log the fetched data
       } catch (error) {
+        console.error('Error fetching friend requests:', error);
         this.showAlertWithMessage('Failed to fetch friend requests', 'error');
       }
     },
@@ -258,7 +273,7 @@ export default {
             'Authorization': this.authToken,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({friendshipId})
+          body: JSON.stringify({ friendshipId })
         });
         const result = await response.json();
         if (!response.ok) {
@@ -280,7 +295,7 @@ export default {
             'Authorization': this.authToken,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({friendshipId})
+          body: JSON.stringify({ friendshipId })
         });
         if (!response.ok) {
           throw new Error((await response.json()).message);
@@ -349,7 +364,7 @@ export default {
 }
 
 .v-avatar img, .v-list-item-avatar img {
-  max-width: 100%; /* Ensures the image does not exceed the container's width */
+  max-width: 100%;  /* Ensures the image does not exceed the container's width */
   max-height: 100%; /* Ensures the image does not exceed the container's height */
   border-radius: 50%; /* Makes the avatar image round */
 }
