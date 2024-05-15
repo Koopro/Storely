@@ -49,8 +49,8 @@ export default {
   methods: {
     initializeSocket() {
       // Initialize Socket connection
-      this.socket = io('https://api.storely.at', { // Ensure this is your server address
-        query: { token: localStorage.getItem('authToken') }
+      this.socket = io('http://localhost:3000', { // Ensure this is your server address
+        query: {token: localStorage.getItem('authToken')}
       });
 
       this.socket.on('chatMessage', (message) => {
@@ -94,7 +94,7 @@ export default {
       if (!user.conversationId) {
         user.conversationId = this.generateConversationId(this.getUser._id, user._id);
       }
-      this.selectedUser = { ...user, messages: [] };
+      this.selectedUser = {...user, messages: []};
       this.fetchMessages(user.conversationId);
     },
     generateConversationId(userId1, userId2) {
@@ -110,7 +110,7 @@ export default {
         timestamp: new Date()
       };
       this.socket.emit('chatMessage', messageData);
-      this.addMessageToChat({ ...messageData, sender: { _id: this.getUser._id, name: 'You' } });
+      this.addMessageToChat({...messageData, sender: {_id: this.getUser._id, name: 'You'}});
       this.newMessage = '';
     },
     addMessageToChat(message) {
@@ -127,8 +127,8 @@ export default {
       }
     },
     fetchMessages(conversationId) {
-      axios.get(`${process.env.VUE_APP_API_URL}/api/chat/history/${conversationId}`, {
-        headers: { 'Authorization': this.authToken }
+      axios.get(`http://localhost:3000/api/chat/history/${conversationId}`, {
+        headers: {'Authorization': this.authToken}
       }).then(response => {
         this.selectedUser.messages = response.data;
       }).catch(error => {
@@ -147,6 +147,7 @@ export default {
   padding-left: 10px;
   border-right: 1px solid #ccc;
 }
+
 .users-container {
   width: auto;
   overflow-y: auto;

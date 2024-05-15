@@ -66,13 +66,19 @@ exports.listPendingFriendRequests = async (req, res) => {
             status: 'requested'
         }).populate('requester');
 
+        if (!pendingRequests.length) {
+            console.log("No pending requests found for User ID:", userId);
+            return res.status(200).json({ message: 'No pending friend requests.', data: [] });
+        }
+
         console.log("Found requests:", pendingRequests);
         res.status(200).json({ message: 'Pending friend requests retrieved.', data: pendingRequests });
     } catch (error) {
         console.error("Error retrieving pending friend requests:", error);
-        res.status(500).send({ message: 'Error retrieving pending friend requests.' });
+        res.status(500).json({ message: 'Error retrieving pending friend requests.', error: error.message });
     }
 };
+
 
 exports.listSentFriendRequests = async (req, res) => {
     try {

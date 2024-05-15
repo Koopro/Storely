@@ -2,10 +2,10 @@
   <v-container fluid class="container">
     <v-card class="mx-auto card" shaped elevation="12" max-width="800">
       <v-tabs v-model="tab" background-color="deep-purple accent-4" dark centered>
-        <v-tab key="users">Users</v-tab>
-        <v-tab key="friends">Friends</v-tab>
-        <v-tab key="requests">Friend Requests</v-tab>
-        <v-tab key="outgoing">Pending Sent Requests</v-tab>
+        <v-tab value="users">Users</v-tab>
+        <v-tab value="friends">Friends</v-tab>
+        <v-tab value="requests">Friend Requests</v-tab>
+        <v-tab value="sent">Pending Sent Requests</v-tab>
       </v-tabs>
 
       <v-window v-model="tab">
@@ -19,10 +19,10 @@
                 <v-avatar>
                   <img :src="'https://api.storely.at' + user.profileImageUrl" alt="User's Profile Picture">
                 </v-avatar>
-                <v-list-item id="nameUser">
+                <v-list-item-content id="nameUser">
                   <v-list-item-title class="headline">{{ user.name }}</v-list-item-title>
                   <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
-                </v-list-item>
+                </v-list-item-content>
                 <v-list-item-action id="addFriend">
                   <v-btn icon @click="addFriend(user._id)">
                     <v-icon color="green">mdi-account-plus</v-icon>
@@ -31,11 +31,10 @@
               </v-list-item>
             </template>
             <v-list-item v-else>
-              <v-list-item class="text-center">
+              <v-list-item-content class="text-center">
                 No users found.
-              </v-list-item>
+              </v-list-item-content>
             </v-list-item>
-
           </v-list>
         </v-window-item>
 
@@ -44,27 +43,30 @@
           <v-list dense>
             <v-list-subheader class="text-h5 pa-2">My Friends</v-list-subheader>
             <v-divider></v-divider>
-            <v-list-item>
+            <template v-if="friends.length > 0">
               <v-list-item v-for="friend in friends" :key="friend._id" two-line>
                 <v-avatar tile size="56">
                   <img :src="getFriendPfp(friend)" alt="Friend's Profile Picture">
                 </v-avatar>
-                <v-list-item-content>
-                  <v-list-item-title class="headline" id="nameFriend">
+                <v-list-item-content id="nameFriend">
+                  <v-list-item-title class="headline">
                     {{ friend.requester._id === getUser._id ? friend.recipient.name : friend.requester.name }}
                   </v-list-item-title>
                 </v-list-item-content>
-                <v-list-item-action>
-                  <v-btn icon @click="removeFriend(friend._id)" id="removeFriend">
+                <v-list-item-action id="removeFriend">
+                  <v-btn icon @click="removeFriend(friend._id)">
                     <v-icon color="red">mdi-account-remove</v-icon>
                   </v-btn>
                 </v-list-item-action>
               </v-list-item>
+            </template>
+            <v-list-item v-else>
+              <v-list-item-content class="text-center">
+                No friends found.
+              </v-list-item-content>
             </v-list-item>
-
           </v-list>
         </v-window-item>
-
 
         <!-- Friend Requests Tab -->
         <v-window-item value="requests">
@@ -74,28 +76,27 @@
             <template v-if="friendRequests.length > 0">
               <v-list-item v-for="request in friendRequests" :key="request._id" class="user-item">
                 <v-avatar tile size="56">
-                  <img :src="'https://api.storely.at'+request.requester.profileImageUrl" alt="Requester's Profile Picture">
+                  <img :src="'https://api.storely.at' + request.requester.profileImageUrl" alt="Requester's Profile Picture">
                 </v-avatar>
-                <v-list-item>
+                <v-list-item-content>
                   <v-list-item-title class="headline">{{ request.requester?.name }} wants to connect</v-list-item-title>
-                </v-list-item>
+                </v-list-item-content>
                 <v-list-item-action>
                   <v-btn icon @click="acceptFriend(request._id)">
                     <v-icon color="blue">mdi-account-check</v-icon>
                   </v-btn>
                 </v-list-item-action>
               </v-list-item>
-
             </template>
             <v-list-item v-else>
-              <v-list-item class="text-center">
+              <v-list-item-content class="text-center">
                 No friend requests.
-              </v-list-item>
+              </v-list-item-content>
             </v-list-item>
           </v-list>
         </v-window-item>
 
-
+        <!-- Sent Friend Requests Tab -->
         <v-window-item value="sent">
           <v-list dense>
             <v-list-subheader class="text-h5 pa-2">Sent Friend Requests</v-list-subheader>
@@ -103,24 +104,23 @@
             <template v-if="sentRequests.length > 0">
               <v-list-item v-for="request in sentRequests" :key="request._id" class="user-item">
                 <v-avatar tile size="56">
-                  <img :src="'https://api.storely.at'+request.recipient.profileImageUrl" alt="Requester's Profile Picture">
+                  <img :src="'https://api.storely.at' + request.recipient.profileImageUrl" alt="Recipient's Profile Picture">
                 </v-avatar>
-                <v-list-item id="namePending">
+                <v-list-item-content id="namePending">
                   <v-list-item-title class="headline">{{ request.recipient.name }} <v-icon color="orange">mdi-account-clock</v-icon></v-list-item-title>
-                </v-list-item>
+                </v-list-item-content>
               </v-list-item>
             </template>
             <v-list-item v-else>
-              <v-list-item class="text-center">
+              <v-list-item-content class="text-center">
                 No sent friend requests.
-              </v-list-item>
+              </v-list-item-content>
             </v-list-item>
           </v-list>
         </v-window-item>
-
-
       </v-window>
     </v-card>
+
     <!-- Snackbar Notification -->
     <v-snackbar v-model="showAlert" :color="alertColor" :timeout="4000" bottom right>
       {{ alertText }}
@@ -128,12 +128,10 @@
   </v-container>
 </template>
 
-
-
 <script>
 export default {
   data: () => ({
-    tab: null,
+    tab: 'users',
     users: [],
     friends: [],
     friendRequests: [],
@@ -153,23 +151,21 @@ export default {
           credentials: 'include',
           headers: {
             'Authorization': this.authToken
-          } 
+          }
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         this.getUser = data;
-
       } catch (error) {
         console.error('Failed to fetch user info:', error);
       }
     },
 
-
     getFriendPfp(friend) {
       const friendProfile = friend.requester._id === this.getUser._id ? friend.recipient : friend.requester;
-      return friendProfile.profileImageUrl ? `${process.env.VUE_APP_API_URL}${friendProfile.profileImageUrl}`: null;
+      return friendProfile.profileImageUrl ? `${process.env.VUE_APP_API_URL}${friendProfile.profileImageUrl}` : null;
     },
 
     async fetchUsers() {
@@ -187,15 +183,11 @@ export default {
       }
     },
 
-    // Inside your Vue component's methods object
-
     async fetchSentRequests() {
       try {
         const response = await fetch(`${this.apiUrl}/friends/sentrequests`, {
           method: 'GET',
-          headers: {
-            'Authorization': this.authToken
-          }
+          headers: { 'Authorization': this.authToken }
         });
         if (!response.ok) {
           throw new Error('Failed to fetch sent friend requests');
@@ -209,15 +201,6 @@ export default {
       }
     },
 
-
-
-
-// Add this to your created or mounted lifecycle hook to fetch when the component loads
-
-
-
-
-
     async addFriend(friendId) {
       try {
         const response = await fetch(`${this.apiUrl}/friends/request`, {
@@ -226,113 +209,111 @@ export default {
             'Authorization': this.authToken,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ recipientId: friendId })
+          body: JSON.stringify({recipientId: friendId})
         });
         const result = await response.json();
-
 
         if (!response.ok) {
           throw new Error(result.message);
         }
-        this.alertText = result.message;
-        this.alertColor = 'success';
-        this.showAlert = true;
+        this.showAlertWithMessage(result.message, 'success');
         this.fetchFriends();
       } catch (error) {
-        this.alertText = error.message;
-        this.alertColor = 'error';
-        this.showAlert = true;
+        this.showAlertWithMessage(error.message, 'error');
       }
     },
+
     async fetchFriends() {
       try {
         const response = await fetch(`${this.apiUrl}/friends/list`, {
           method: 'GET',
           headers: {'Authorization': this.authToken}
         });
-        this.friends = await response.json();
+        const result = await response.json();
+        this.friends = result.data;
         console.log("Fetched friends:", this.friends);
       } catch (error) {
         this.showAlertWithMessage('Failed to fetch friends', 'error');
       }
     },
+
     async fetchFriendRequests() {
       try {
         const response = await fetch(`${this.apiUrl}/friends/pending`, {
           method: 'GET',
           headers: {'Authorization': this.authToken}
         });
-        this.friendRequests = await response.json();
+        const result = await response.json();
+        this.friendRequests = result.data;
       } catch (error) {
         this.showAlertWithMessage('Failed to fetch friend requests', 'error');
       }
     },
+
     async acceptFriend(friendshipId) {
       try {
         const response = await fetch(`${this.apiUrl}/friends/accept`, {
           method: 'POST',
-          headers: {'Authorization': this.authToken, 'Content-Type': 'application/json'},
+          headers: {
+            'Authorization': this.authToken,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({friendshipId})
         });
         const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.message);
+        }
         this.showAlertWithMessage('Friend request accepted!', 'success');
-        this.fetchFriendRequests();
-        this.fetchFriends();
+        await this.fetchFriendRequests();
+        await this.fetchFriends();
       } catch (error) {
         this.showAlertWithMessage('Failed to accept friend request', 'error');
       }
     },
+
     async removeFriend(friendshipId) {
       try {
         const response = await fetch(`${this.apiUrl}/friends/remove`, {
           method: 'POST',
-          headers: {'Authorization': this.authToken, 'Content-Type': 'application/json'},
+          headers: {
+            'Authorization': this.authToken,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({friendshipId})
         });
-        if (response.ok) {
-          this.showAlertWithMessage('Friendship removed!', 'success');
-          this.fetchFriends();
-        } else {
+        if (!response.ok) {
           throw new Error((await response.json()).message);
         }
+        this.showAlertWithMessage('Friendship removed!', 'success');
+        this.fetchFriends();
       } catch (error) {
         this.showAlertWithMessage('Failed to remove friend', 'error');
       }
     },
+
     showAlertWithMessage(message, type) {
       this.alertText = message;
       this.alertColor = type;
       this.showAlert = true;
     }
   },
+
   created() {
     this.fetchUsers();
     this.fetchFriends();
     this.fetchFriendRequests();
-    this.fetchSentRequests(); // Fetch sent requests on component creation
-    this.getUserInfo();
-  },
-
-  mounted() {
-    this.fetchUsers();
+    this.fetchSentRequests();
     this.getUserInfo();
   }
 }
 </script>
 
 <style scoped>
-v-btn{
-  border: none;
-  background: none;
-  box-shadow: none;
-}
-.v-btn--variant-elevated {
-  box-shadow: none;
-}
 .container {
   max-width: 1000px; /* Limiting the width for better focus */
   height: 50vh;
-  margin: auto; /* Centering the card in the container */ 
+  margin: auto; /* Centering the card in the container */
 }
 
 .card {
@@ -340,22 +321,22 @@ v-btn{
   overflow: hidden; /* Ensures nothing bleeds outside the border */
 }
 
-v-tab {
+.v-tab {
   font-size: 1.2rem; /* Larger font size for tabs */
   padding: 12px 24px; /* More padding for a better touch target */
 }
 
-v-window-item {
+.v-window-item {
   padding: 20px; /* Padding inside tab content for spacing */
   background-color: #f9f9f9; /* Light background for the content area */
 }
 
-v-list-item {
+.v-list-item {
   border-bottom: 1px solid #eee; /* Subtle separators for list items */
   transition: background-color 0.3s; /* Smooth transition for hover effects */
 }
 
-v-list-item:hover {
+.v-list-item:hover {
   background-color: #f0f0f0; /* Highlight list items on hover */
 }
 
@@ -368,7 +349,7 @@ v-list-item:hover {
 }
 
 .v-avatar img, .v-list-item-avatar img {
-  max-width: 100%;  /* Ensures the image does not exceed the container's width */
+  max-width: 100%; /* Ensures the image does not exceed the container's width */
   max-height: 100%; /* Ensures the image does not exceed the container's height */
   border-radius: 50%; /* Makes the avatar image round */
 }
@@ -377,35 +358,34 @@ v-list-item:hover {
   color: #666; /* Muted icon colors for less visual noise */
 }
 
-v-snackbar {
+.v-snackbar {
   border-radius: 5px; /* Rounded corners for the snackbar */
 }
 
-#nameUser{
+#nameUser {
   margin-left: 50px;
   margin-top: -40px;
   max-width: 500px;
 }
 
-#nameFriend{
+#nameFriend {
   margin-left: 80px;
   margin-top: -40px;
   max-width: 200px;
 }
 
-#addFriend{
+#addFriend {
   margin-left: 400px;
   margin-top: -40px;
 }
 
-#removeFriend{
+#removeFriend {
   margin-left: 300px;
   margin-top: -40px;
 }
 
-#namePending{
+#namePending {
   margin-left: 80px;
   margin-top: -50px;
 }
-
 </style>

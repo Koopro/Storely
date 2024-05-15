@@ -53,34 +53,46 @@ app.use(express.static(path.join(__dirname, "public")));
 dbConnectMongoose();
 dbConnectMongoClient();
 
+const userSocketMap = new Map();
+
 // Socket.IO middleware and configuration
 io.use(socketAuthMiddleware);
 io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}, User ID: ${socket.userId}`);
+  const userId = socket.userId;
+  userSocketMap.set(userId, socket.id);
+
+  console.log(`User connected: ${socket.id}, User ID: ${userId}`);
 
   // Update user status to 'online' upon connection
-  updateUserStatus(socket.userId, "online").catch((err) => console.error(err));
+  updateUserStatus(userId, "online").catch((err) => console.error(err));
 
   socket.on('chatMessage', async (messageData) => {
     try {
       // Save the message to the database
       const savedMessage = await saveMessage(messageData);
+
       // Emit the message to the recipient
-      io.to(messageData.recipient).emit('chatMessage', savedMessage);
+      const recipientSocketId = userSocketMap.get(messageData.recipient);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit('chatMessage', savedMessage);
+      }
+      // Emit to the sender's own socket
+      socket.emit('chatMessage', savedMessage);
     } catch (error) {
       console.error('Error sending chat message:', error);
     }
   });
 
   socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.id}, User ID: ${socket.userId}`);
+    console.log(`User disconnected: ${socket.id}, User ID: ${userId}`);
+    userSocketMap.delete(userId);
     // Update user status to 'offline' upon disconnection
-    updateUserStatus(socket.userId, "offline").catch((err) => console.error(err));
+    updateUserStatus(userId, "offline").catch((err) => console.error(err));
   });
 
   socket.on("updateStatus", (status) => {
     // This allows for manual status updates
-    updateUserStatus(socket.userId, status).catch((err) => console.error(err));
+    updateUserStatus(userId, status).catch((err) => console.error(err));
   });
 });
 
