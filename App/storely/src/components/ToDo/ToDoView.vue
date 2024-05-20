@@ -32,7 +32,7 @@
 
   <!--ToDo-->
   <div class="ToDo" :class="{ 'ToDo-Dark': isDarkMode }">
-    <button class="add-todo-button" :class="{ 'add-todo-button-DARK': isDarkMode }">ToDo Hinzufügen</button>
+    <ToDo />
   </div>
 
 </template>
@@ -41,11 +41,13 @@
 import axios from 'axios';
 import Sidebar from '../sidebar/Sidebar.vue';
 import Clock from './Clock.vue';
+import ToDo from './ToDo.vue';
 
 export default {
   components: {
     Sidebar, 
-    Clock, 
+    Clock,
+    ToDo
   },
   data() {
   return {
@@ -400,20 +402,4 @@ export default {
   .ToDo-Dark {
     background-color: #9f9f9f;
   }
-
-  .add-todo-button {
-    position: absolute;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: center;
-    bottom: 20px;
-    height: 35px;
-    width: 200px;
-    z-index: 999;
-    border-radius: 10px;
-    background-color: #707070;
-    color: rgb(0, 0, 0);
-  }
-
 </style>

@@ -1,5 +1,6 @@
 const List = require('../models/List');
 const User = require('../models/User');
+const Todo = require('../models/Todo');
 const cors = require('cors');
 
 exports.listspost = async (req, res) => {
@@ -48,5 +49,44 @@ exports.listid = async (req, res) => {
     } catch (error) {
         console.error("Error during deletion:", error);
         res.status(500).send(error);
+    }
+};
+
+exports.createTodo = async (req, res) => {
+    const { name, description, dueDate, dueTime, urgent, listId } = req.body;
+    const userId = req.userData.userId;
+
+    if (!name || !listId) {
+        return res.status(400).send({ message: 'Name and List ID are required' });
+    }
+
+    const newTodo = new Todo({
+        name,
+        description,
+        dueDate,
+        dueTime,
+        urgent,
+        completed: false,
+        list: listId,
+        user: userId
+    });
+
+    try {
+        await newTodo.save();
+        res.status(201).send(newTodo);
+    } catch (error) {
+        res.status(500).send({ message: 'Server error', error: error.message });
+    }
+};
+
+exports.getTodosByList = async (req, res) => {
+    const { listId } = req.params;
+    const userId = req.userData.userId;
+
+    try {
+        const todos = await Todo.find({ list: listId, user: userId });
+        res.status(200).send(todos);
+    } catch (error) {
+        res.status(500).send({ message: 'Server error', error: error.message });
     }
 };
