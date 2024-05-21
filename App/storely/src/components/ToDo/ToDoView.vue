@@ -7,11 +7,18 @@
     <div class="inner-menu">
       <ul>
         <!-- Automatisch Listenpunkte generieren basierend auf verfügbaren Listen -->
-        <li v-for="list in lists" :key="list._id" :style="{ backgroundColor: list.color, color: list.isDarkText ? 'white' : 'black' }">
+        <li v-for="list in lists" :key="list._id" 
+        :style="{
+          backgroundColor: list.color,
+          color: list.isDarkText ? 'white' : 'black',
+          border: list._id === selectedListId
+            ? list.isDarkText ? '2px solid white' : '2px solid black'
+            : 'none'
+        }"
+            @click="selectList(list._id)">
           {{ list.name }}
-          <i class="fas fa-trash" :class="{ 'fas fa-trash-dark': isDarkMode }" @click="promptDelete(list._id, list.password)"></i>
+          <i class="fas fa-trash" :class="{ 'fas fa-trash-dark': isDarkMode }" @click.stop="promptDelete(list._id, list.password)"></i>
         </li>
-
       </ul>
     </div>
     <button class="add-list-button" :class="{ 'add-list-button-dark': isDarkMode }" @click="openPopup">Liste Hinzufügen</button>
@@ -32,7 +39,7 @@
 
   <!--ToDo-->
   <div class="ToDo" :class="{ 'ToDo-Dark': isDarkMode }">
-    <button class="add-todo-button" :class="{ 'add-todo-button-DARK': isDarkMode }">ToDo Hinzufügen</button>
+    <ToDo />
   </div>
 
 </template>
@@ -41,26 +48,28 @@
 import axios from 'axios';
 import Sidebar from '../sidebar/Sidebar.vue';
 import Clock from './Clock.vue';
+import ToDo from './ToDo.vue';
 
 export default {
   components: {
     Sidebar, 
-    Clock, 
+    Clock,
+    ToDo
   },
   data() {
-  return {
-    isDarkMode: false,
-    lists: [],
-    listColor: '#ffffff',  // Standardfarbe, falls keine gewählt wird
-    authToken: `Bearer ${localStorage.getItem('authToken')}`,
-    apiUrl: `${process.env.VUE_APP_API_URL}/api`
-
-  };
-},
-
+    return {
+      isDarkMode: false,
+      lists: [],
+      listColor: '#ffffff',  // Standardfarbe, falls keine gewählt wird
+      selectedListId: null,  // Zustand für ausgewählte Liste
+      authToken: `Bearer ${localStorage.getItem('authToken')}`,
+      apiUrl: `${process.env.VUE_APP_API_URL}/api`
+    };
+  },
   created() {
     this.handleDarkMode();
     this.fetchLists();
+    this.loadSelectedList();
   },
   methods: {
     // Dark Mode
@@ -106,6 +115,7 @@ export default {
           
           // Überprüfe die Helligkeit des Hintergrunds und aktualisiere die Schriftfarbe entsprechend
           const isDarkText = this.isDarkBackground(listColor);
+
           // Füge ein Attribut zum Listenobjekt hinzu, um den Schriftfarbmodus zu speichern
           response.data.isDarkText = isDarkText;
 
@@ -121,8 +131,6 @@ export default {
       }
     },
 
-
-
     async fetchLists() {
       try {
         const response = await axios.get(`${this.apiUrl}/todo/lists` ,{
@@ -131,13 +139,34 @@ export default {
           headers: {'Authorization': this.authToken},
         });
         this.lists = response.data;
+        console.log(response.data);
+        
+
+        this.lists.forEach(list => {
+          const isDarkText = this.isDarkBackground(list.color);
+          // Füge ein Attribut zum Listenobjekt hinzu, um den Schriftfarbmodus zu speichern
+          list.isDarkText = isDarkText;
+        });
+
+
+        const selectedListId = localStorage.getItem('selectedListId');
+        if (selectedListId !== null) {
+          this.loadSelectedList();
+        } else {
+          if (this.lists.length > 0) {
+          const firstListId = this.lists[0]._id;
+          localStorage.setItem('selectedListId', firstListId);
+          this.loadSelectedList();
+        }
+        }
+
       } catch (error) {
         this.handleError(error.message);
       }
     },
 
     promptDelete(listId) {
-        this.deleteList(listId);
+      this.deleteList(listId);
     },
 
     async deleteList(listId) {
@@ -153,35 +182,48 @@ export default {
         console.log(error)
       }
     },
+
     isDarkBackground(color) {
-    // Erzeuge ein unsichtbares HTML-Element, um die Farbe zu analysieren
-    let span = document.createElement("span");
-    span.style.color = color;
-    span.style.display = "none";
-    document.body.appendChild(span);
+      // Erzeuge ein unsichtbares HTML-Element, um die Farbe zu analysieren
+      let span = document.createElement("span");
+      span.style.color = color;
+      span.style.display = "none";
+      document.body.appendChild(span);
 
-    // Berechne die Helligkeit des Hintergrunds
-    let backgroundColor = window.getComputedStyle(span).color;
-    let rgb = backgroundColor.match(/\d+/g).map(Number);
-    let brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+      // Berechne die Helligkeit des Hintergrunds
+      let backgroundColor = window.getComputedStyle(span).color;
+      let rgb = backgroundColor.match(/\d+/g).map(Number);
+      let brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
 
-    // Entferne das unsichtbare HTML-Element
-    document.body.removeChild(span);
+      // Entferne das unsichtbare HTML-Element
+      document.body.removeChild(span);
 
-    // Wenn die Helligkeit unter einem Schwellenwert liegt, ist die Farbe dunkel
-    return brightness < 128;
-  },
+      // Wenn die Helligkeit unter einem Schwellenwert liegt, ist die Farbe dunkel
+      return brightness < 128;
+    },
+
     closePopup() {
       document.querySelector('.popup-list-wrap').style.display = 'none';
       document.querySelector('.popup-background').style.display = 'none';
     },
-    // Clock
+
+    selectList(listId) {
+      this.selectedListId = listId;
+      console.log(listId);
+      localStorage.setItem('selectedListId', listId);
+      window.location.reload(); // Seite neu laden
+    },
+    loadSelectedList() {
+    const selectedListId = localStorage.getItem('selectedListId');
+    if (selectedListId) {
+      this.selectedListId = selectedListId;
+    }
+  },
   }
 };
 </script>
-  
-  
-  <style scoped>
+
+<style scoped>
   * {
     margin: 0;
     padding: 0;
@@ -198,7 +240,6 @@ export default {
     transition: background-color 0.3s; /* Smooth transition for background color */
   }
   
-
   .dark-top {
     background-color: #000000; /* Dark mode color for top bar */
   }
@@ -214,14 +255,12 @@ export default {
     transition: background-color 0.3s; /* Smooth transition for background color */
   }
 
-
   .inner-menu {
     width: 100%;
     height: 100%;
     margin-top: 110px;
     margin: 110px 20% 0 20%;
   }
-
   
   /* Styles for dark mode */
   .dark-menu {
@@ -325,7 +364,6 @@ export default {
     background-color: rgba(255, 255, 255, 0.4);
   }
 
-
   .popup-add-list-input-DARK {
     border: 2px solid #ffffff;
     color: white;
@@ -341,7 +379,6 @@ export default {
     width: 10%;
   }
 
-
   ul {
     list-style-type: none;
     display: flex;
@@ -349,17 +386,18 @@ export default {
   }
 
   li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.4); /* Hintergrundfarbe des li-Elements */
-  font-weight: bolder;
-  text-transform: uppercase;
-  color: black; /* Textfarbe */
-  padding: 5px 5px;
-  margin-bottom: 10px; /* Distance between li elements */
-  padding-left: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.4); /* Hintergrundfarbe des li-Elements */
+    font-weight: bolder;
+    text-transform: uppercase;
+    color: black; /* Textfarbe */
+    padding: 5px 5px;
+    margin-bottom: 10px; /* Distance between li elements */
+    padding-left: 15px;
+    cursor: pointer; /* Change cursor to pointer */
   }
 
   li i.fas.fa-trash {
@@ -377,13 +415,13 @@ export default {
   li i.fas.fa-trash-dark {
     background-color: #414141;
   }
-  
+
   .clock {
     color: rgb(255, 255, 255);
   }
 
   .clock-dark {
-    color: rgb(157, 157, 157)
+    color: rgb(157, 157, 157);
   }
 
   .ToDo {
@@ -400,20 +438,4 @@ export default {
   .ToDo-Dark {
     background-color: #9f9f9f;
   }
-
-  .add-todo-button {
-    position: absolute;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: center;
-    bottom: 20px;
-    height: 35px;
-    width: 200px;
-    z-index: 999;
-    border-radius: 10px;
-    background-color: #707070;
-    color: rgb(0, 0, 0);
-  }
-
 </style>
