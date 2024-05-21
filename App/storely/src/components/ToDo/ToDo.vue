@@ -1,55 +1,62 @@
 <template>
+  <div class="add-todo-button-wrap">
     <button @click="showPopup = true" class="add-todo-button">Neue ToDo hinzufügen</button>
-    <div class="popup" v-if="showPopup">
-      <h2>Neue ToDo</h2>
-      <input v-model="newTodo.name" placeholder="Name" />
-      <textarea v-model="newTodo.description" placeholder="Beschreibung"></textarea>
-      <input v-model="newTodo.dueDate" type="date" />
-      <input v-model="newTodo.dueTime" type="time" />
-      <label>
-        Dringend
-        <input v-model="newTodo.urgent" type="checkbox" />
-      </label>
-      <button @click="addTodo">Hinzufügen</button>
-      <button @click="showPopup = false">Abbrechen</button>
-    </div>
+  </div>
+  <div class="popup" v-if="showPopup">
+    <h2>Neue ToDo</h2>
+    <input v-model="newTodo.name" placeholder="Name" />
+    <textarea v-model="newTodo.description" placeholder="Beschreibung"></textarea>
+    <input v-model="newTodo.dueDate" type="date" />
+    <input v-model="newTodo.dueTime" type="time" />
+    <label>
+      Dringend
+      <input v-model="newTodo.urgent" type="checkbox" />
+    </label>
+    <button @click="createTodo">Hinzufügen</button>
+    <button @click="showPopup = false">Abbrechen</button>
+  </div>
 
-    <div class="popup" v-if="showEditPopup">
-      <h2>ToDo bearbeiten</h2>
-      <input v-model="editTodo.name" placeholder="Name" />
-      <textarea v-model="editTodo.description" placeholder="Beschreibung"></textarea>
-      <input v-model="editTodo.dueDate" type="date" />
-      <input v-model="editTodo.dueTime" type="time" />
-      <label>
-        Dringend
-        <input v-model="editTodo.urgent" type="checkbox" />
-      </label>
-      <label>
-        Erledigt
-        <input v-model="editTodo.completed" type="checkbox" />
-      </label>
-      <button @click="updateTodo">Speichern</button>
-      <button @click="showEditPopup = false">Abbrechen</button>
-    </div>
+  <div class="popup" v-if="showEditPopup">
+    <h2>ToDo bearbeiten</h2>
+    <input v-model="editTodo.name" placeholder="Name" />
+    <textarea v-model="editTodo.description" placeholder="Beschreibung"></textarea>
+    <input v-model="editTodo.dueDate" type="date" />
+    <input v-model="editTodo.dueTime" type="time" />
+    <label>
+      Dringend
+      <input v-model="editTodo.urgent" type="checkbox" />
+    </label>
+    <label>
+      Erledigt
+      <input v-model="editTodo.completed" type="checkbox" />
+    </label>
+    <button @click="updateTodo">Speichern</button>
+    <button @click="showEditPopup = false">Abbrechen</button>
+  </div>
 
-    <div class="grid-container">
-      <div
-        v-for="(todo, index) in sortedTodos"
-        :key="index"
-        :class="['grid-item', todoClass(todo)]"
-        @click="selectTodo(todo)"
-      >
-        <div class="todo-header">{{ todo.name }}</div>
-        <div class="todo-description">{{ todo.description }}</div>
-      </div>
+  <div class="grid-container">
+    <div
+      v-for="(todo, index) in sortedTodos"
+      :key="index"
+      :class="['grid-item', todoClass(todo)]"
+      @click="selectTodo(todo)"
+    >
+      <div class="todo-header">{{ todo.name }}</div>
+      <div class="todo-description">{{ todo.description }}</div>
     </div>
+  </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
-      todos: JSON.parse(localStorage.getItem('todos')) || [],
+      apiUrl: `${process.env.VUE_APP_API_URL}/api`,
+      authToken: `Bearer ${localStorage.getItem('authToken')}`,
+      selectedListId: localStorage.getItem('selectedListId'),
+      todos: [],
       newTodo: {
         name: '',
         description: '',
@@ -81,12 +88,44 @@ export default {
     }
   },
   methods: {
-    addTodo() {
-      if (this.newTodo.name.trim() !== '') {
-        this.todos.push({ ...this.newTodo });
-        this.saveTodos();
-        this.resetNewTodo();
-        this.showPopup = false;
+    async fetchTodos() {
+      try {
+        const response = await axios.get(`${this.apiUrl}/todos`, {
+          params: { list: this.selectedListId },
+          headers: {
+            'Authorization': this.authToken
+          }
+        });
+        this.todos = response.data;
+      } catch (error) {
+        console.log('Error fetching todos: ' + error.response.data.message);
+      }
+    },
+    async createTodo() {
+      if (!this.selectedListId) {
+        console.log('No list selected!');
+        return;
+      }
+
+      const todoData = {
+        ...this.newTodo,
+        list: this.selectedListId
+      };
+
+      try {
+        const response = await axios.post(`${this.apiUrl}/todos`, todoData, {
+          headers: {
+            'Authorization': this.authToken
+          }
+        });
+        if (response.status === 201) {
+          console.log('Todo created successfully!');
+          this.todos.push(response.data);
+          this.resetNewTodo();
+          this.showPopup = false;
+        }
+      } catch (error) {
+        console.log('Error creating todo: ' + error.response.data.message);
       }
     },
     resetNewTodo() {
@@ -104,26 +143,33 @@ export default {
       this.editTodo = { ...todo };
       this.showEditPopup = true;
     },
-    updateTodo() {
-      if (this.editIndex !== null) {
-        this.todos.splice(this.editIndex, 1, { ...this.editTodo });
-        this.saveTodos();
-        this.showEditPopup = false;
+    async updateTodo() {
+      try {
+        const response = await axios.put(`${this.apiUrl}/todos/${this.editTodo._id}`, this.editTodo, {
+          headers: {
+            'Authorization': this.authToken
+          }
+        });
+        if (response.status === 200) {
+          this.todos.splice(this.editIndex, 1, response.data);
+          this.showEditPopup = false;
+        }
+      } catch (error) {
+        console.log('Error updating todo: ' + error.response.data.message);
       }
     },
     completeTodo(todo) {
       todo.completed = true;
-      this.saveTodos();
-      this.selectedTodo = null;
-    },
-    saveTodos() {
-      localStorage.setItem('todos', JSON.stringify(this.todos));
+      this.updateTodo();
     },
     todoClass(todo) {
       if (todo.completed) return 'completed';
       if (todo.urgent) return 'urgent';
       return 'normal';
     }
+  }, 
+  created() {
+    this.fetchTodos();
   }
 };
 </script>
@@ -146,25 +192,33 @@ body {
 }
 
 .grid-container {
-  display: grid;
-  grid-template-columns: 23% 23% 23% 23%;
-  gap: 1%;
-  width: 97%;
-  height: auto;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
   justify-content: center;
-  overflow: auto;
-  margin-top: 10px;
+  align-items: flex-start;
+  gap: 1%; /* Adds the gap between rows and columns */
 }
 
 .grid-item {
+  flex: 1 1 calc(33.33% - 1%); /* Calculate the width including the gap */
+  max-width: calc(33.33% - 1%);
+  margin-bottom: 1%; /* Adds the gap between rows */
   display: flex;
   flex-direction: column;
   border: 1px solid #ccc;
   cursor: pointer;
   position: relative;
-  aspect-ratio: 1 / 1; /* Ensures the grid items are always square */
+  aspect-ratio: 1 / 1;
   border-radius: 20px;
+  background-color: #4caf50;
+  color: white;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  box-sizing: border-box;
 }
+
 
 .grid-item.urgent {
   background-color: #ff6b6b;
@@ -215,7 +269,7 @@ body {
 }
 
 .add-todo-button {
-  position: absolute;
+  position: fixed;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -227,6 +281,16 @@ body {
   border-radius: 10px;
   background-color: #707070;
   color: rgb(0, 0, 0);
+}
+
+.add-todo-button-wrap {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  bottom: 10%;
+  left: 25%;
+  right: 0;
   z-index: 999;
 }
+
 </style>

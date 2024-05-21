@@ -43,7 +43,7 @@ app.use(morgan('dev')); // Log requests to the console.
 app.use("/api", authRoutes);
 app.use("/api", userProfileRoutes);
 app.use("/api/friends", friendRoutes);
-app.use("/api/todo", todoRoutes);
+app.use("/api", todoRoutes);
 app.use("/api/chat", chatRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

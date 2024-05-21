@@ -9,8 +9,8 @@ import Calendar from '../views/Calendar.vue';
 import TestView2 from '../views/TestView2.vue';
 import TestView3 from '../views/TestView3.vue';
 import TestView4 from '../views/TestView4.vue';
-import TestTodo from '../components/ToDo/ToDo.vue';
 import TestView7 from '../views/TestView7.vue';
+import TestView8 from '../views/TestView8.vue';
 import AdminView from '../views/AdminView.vue';
 import NotesView from '../views/NotesView.vue';
 
@@ -86,9 +86,9 @@ const routes = [
     component: NotesView
   }, 
   {
-    path: '/1',
-    name: '1',
-    component: TestTodo
+    path: '/testing8',
+    name: 'testing8',
+    component: TestView8
   }
 ];
 
