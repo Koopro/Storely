@@ -170,7 +170,7 @@ export default {
       if (this.selectedFile) {
         formData.append('profileImage', this.selectedFile);
       }
-      formData.append('name', this.editableName); 
+      formData.append('name', this.editableName);
       formData.append('lastname', this.editableLastname);
       formData.append('username', this.editableUsername);
 
