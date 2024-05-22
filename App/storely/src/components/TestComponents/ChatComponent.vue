@@ -57,7 +57,7 @@ export default {
 
     const fetchFriends = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/friends/list`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/friends/list`, {
           headers: {
             Authorization: authToken,
           },
@@ -71,7 +71,7 @@ export default {
 
     const getUserInfo = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/user/profile`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/user/profile`, {
           headers: {
             Authorization: authToken,
           },
@@ -96,7 +96,7 @@ export default {
       if (!selectedUser.value) return;
       const chatId = getChatId();
       try {
-        const response = await axios.get(`http://localhost:3000/api/chats/${chatId}`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/chats/${chatId}`, {
           headers: {
             Authorization: authToken,
           },
@@ -138,7 +138,7 @@ export default {
     };
 
     const setupSocket = () => {
-      socket.value = io('http://localhost:3000', {
+      socket.value = io(`${process.env.VUE_APP_API_URL}`, {
         query: {
           token: localStorage.getItem('authToken'),
         },
@@ -215,7 +215,7 @@ export default {
       const friendProfile =
           friend.requester._id === getUser.value._id ? friend.recipient : friend.requester;
       return friendProfile.profileImageUrl
-          ? `http://localhost:3000${friendProfile.profileImageUrl}`
+          ? `${process.env.VUE_APP_API_URL}${friendProfile.profileImageUrl}`
           : null;
     };
 
