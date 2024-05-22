@@ -3,38 +3,38 @@
     <button @click="showPopup = true" class="add-todo-button">Neue ToDo hinzufügen</button>
   </div>
   <div class="popup" v-if="showPopup">
-    <h2>Neue ToDo</h2>
+    <h2>Add ToDo</h2>
     <input v-model="newTodo.name" class="name" placeholder="Name" />
     <textarea v-model="newTodo.description" class="description" placeholder="Beschreibung"></textarea>
     <input v-model="newTodo.dueDate" class="date" type="date" />
     <input v-model="newTodo.dueTime" class="time" type="time" />
-    <label class="urgent">
-      Dringend
+    <label class="urgentfield">
+      Urgent
       <input v-model="newTodo.urgent" class="check-urgent" type="checkbox" />
     </label>
     <div class="buttons">
-      <button @click="createTodo" class="add">Hinzufügen</button>
-      <button @click="showPopup = false" class="cancel">Abbrechen</button>
-  </div>
+      <button @click="createTodo" class="add">Add</button>
+      <button @click="showPopup = false" class="cancel">Cancel</button>
+    </div>
   </div>
 
   <div class="popup" v-if="showEditPopup">
-    <h2>ToDo bearbeiten</h2>
+    <h2>Edit ToDo</h2>
     <input v-model="editTodo.name" class="name" placeholder="Name" />
     <textarea v-model="editTodo.description" class="description" placeholder="Beschreibung"></textarea>
     <input v-model="editTodo.dueDate" class="date" type="date" />
     <input v-model="editTodo.dueTime" class="time" type="time" />
-    <label class="urgent">
-      Dringend
+    <label class="urgentfield">
+      Urgent
       <input v-model="editTodo.urgent" class="check-urgent" type="checkbox" />
     </label>
     <label class="completed">
-      Erledigt
+      Completed
       <input v-model="editTodo.completed" class="check-completed" type="checkbox" />
     </label>
     <div class="buttons">
-      <button @click="updateTodo" class="add">Speichern</button>
-      <button @click="showEditPopup = false" class="cancel">Abbrechen</button>
+      <button @click="updateTodo" class="add">Add</button>
+      <button @click="showEditPopup = false" class="cancel">Cancel</button>
     </div>
   </div>
 
@@ -284,7 +284,7 @@ body {
   color: black;
 }
 
-.urgent {
+.urgentfield {
   position: absolute;
   display: flex;
   bottom: 100px;
