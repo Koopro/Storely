@@ -11,7 +11,6 @@
           :class="{ active: friend === selectedUser }"
           @click="selectUser(friend)"
       >
-        <v-avatar :src="getFriendPfp(friend)"></v-avatar>
         {{ displayFriendName(friend) }}
       </div>
     </div>
@@ -300,16 +299,24 @@ export default {
   margin-bottom: 10px;
 }
 .my-message {
-  align-self: flex-end;
-  background-color: #d4c6f8;
+  margin-left: auto;
+  align-self: flex-end; /* Nachricht auf der rechten Seite anzeigen */
+  background-color: #dda7f3;
   border-radius: 10px 10px 0 10px;
   padding: 10px;
+  width: fit-content; /* Breite der Nachricht basierend auf dem Inhalt */
+  max-width: 80%; /* Maximalbreite der Nachricht */
+  word-wrap: break-word; /* Text umbrechen, wenn er zu lang ist */
 }
+
 .other-message {
   align-self: flex-start;
   background-color: #f1f0f0;
   border-radius: 10px 10px 10px 0;
   padding: 10px;
+  width: fit-content; /* Breite der Nachricht basierend auf dem Inhalt */
+  max-width: 80%; /* Maximalbreite der Nachricht */
+  word-wrap: break-word; /* Text umbrechen, wenn er zu lang ist */
 }
 .message-sender {
   font-weight: bold;
@@ -373,7 +380,3 @@ export default {
   }
 }
 </style>
-
-
-
-
