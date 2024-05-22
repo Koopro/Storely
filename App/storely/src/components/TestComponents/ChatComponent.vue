@@ -138,7 +138,8 @@ export default {
     };
 
     const setupSocket = () => {
-      socket.value = io(`${process.env.VUE_APP_API_URL}`, {
+      const websocketUrl = `${process.env.VUE_APP_API_URL}`;
+      socket.value = io(websocketUrl, {
         query: {
           token: localStorage.getItem('authToken'),
         },
@@ -258,6 +259,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .no-friends {
   width: auto;
@@ -299,7 +301,7 @@ export default {
 }
 .my-message {
   align-self: flex-end;
-  background-color: #dcf8c6;
+  background-color: #d4c6f8;
   border-radius: 10px 10px 0 10px;
   padding: 10px;
 }
