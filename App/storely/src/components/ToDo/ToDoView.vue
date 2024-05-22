@@ -12,7 +12,7 @@
           backgroundColor: list.color,
           color: list.isDarkText ? 'white' : 'black',
           border: list._id === selectedListId
-            ? list.isDarkText ? '2px solid white' : '2px solid black'
+            ? list.isDarkText ? '3px solid white' : '3px solid black'
             : 'none'
         }"
             @click="selectList(list._id)">
@@ -39,7 +39,9 @@
 
   <!--ToDo-->
   <div class="ToDo" :class="{ 'ToDo-Dark': isDarkMode }">
-    <ToDo />
+    <div class="ToDo-body">
+      <ToDo />
+    </div>
   </div>
 
 </template>
@@ -177,6 +179,8 @@ export default {
           credentials: 'include',
         });
         this.lists = this.lists.filter(list => list._id !== listId);
+        localStorage.removeItem('selectedListId');
+        window.location.reload();
       } catch (error) {
         this.handleError(error.message);
         console.log(error)
@@ -259,7 +263,9 @@ export default {
     width: 100%;
     height: 100%;
     margin-top: 110px;
-    margin: 110px 20% 0 20%;
+    margin: 30% 10% 0 25%;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   
   /* Styles for dark mode */
@@ -438,4 +444,15 @@ export default {
   .ToDo-Dark {
     background-color: #9f9f9f;
   }
+
+  .ToDo-body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 10px 10px 10px 10px;
+    overflow: auto;
+  }
+
 </style>

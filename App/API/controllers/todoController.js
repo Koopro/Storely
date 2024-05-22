@@ -52,12 +52,13 @@ exports.listid = async (req, res) => {
     }
 };
 
-exports.createTodo = async (req, res) => {
-    const { name, description, dueDate, dueTime, urgent, listId } = req.body;
-    const userId = req.userData.userId;
+exports.todospost = async (req, res) => {
+    const { name, description, dueDate, dueTime, urgent, completed } = req.body;
+    const userId = req.userData.userId; // Angenommen, req.userData wird von der Authentifizierungsmiddleware befüllt
+    const listId = req.body.list; // Annahme: `selectedListId` wird im Anfragekörper gesendet
 
-    if (!name || !listId) {
-        return res.status(400).send({ message: 'Name and List ID are required' });
+    if (!name) {
+        return res.status(400).send({ message: 'Name is required' });
     }
 
     const newTodo = new Todo({
@@ -66,7 +67,7 @@ exports.createTodo = async (req, res) => {
         dueDate,
         dueTime,
         urgent,
-        completed: false,
+        completed,
         list: listId,
         user: userId
     });
@@ -79,12 +80,13 @@ exports.createTodo = async (req, res) => {
     }
 };
 
-exports.getTodosByList = async (req, res) => {
-    const { listId } = req.params;
-    const userId = req.userData.userId;
+
+exports.todosget = async (req, res) => {
+    const userId = req.userData.userId; // Ensure user is authenticated
+    const listId = req.query.list; // listId aus query parameter
 
     try {
-        const todos = await Todo.find({ list: listId, user: userId });
+        const todos = await Todo.find({ user: userId, list: listId });
         res.status(200).send(todos);
     } catch (error) {
         res.status(500).send({ message: 'Server error', error: error.message });
