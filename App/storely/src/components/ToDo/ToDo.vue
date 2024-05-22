@@ -107,7 +107,7 @@ export default {
     },
     async createTodo() {
       if (!this.selectedListId) {
-        console.log('No list selected!');
+        alert('Select a list in order to create a new todo!');
         return;
       }
 
@@ -178,7 +178,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 body {
   background-color: rgba(0, 0, 0, alpha);
 }
@@ -290,6 +290,7 @@ body {
   bottom: 100px;
   left: 50%;
   transform: translate(-50%, 0);
+  color: white;
 }
 
 .check-urgent {

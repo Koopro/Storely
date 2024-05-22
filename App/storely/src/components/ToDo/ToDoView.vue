@@ -319,7 +319,7 @@ export default {
     top: 50%;
     transform: translate(-50%, -50%);
     height: 30%;
-    width: 30%;
+    width: 60%;
     background-color: #aeaeae;
     border-radius: 10px;
     z-index: 999;
@@ -439,7 +439,7 @@ export default {
     right: 0;
     bottom: 0;
     background-color: white;
-    z-index: 999;
+    z-index: 500;
   }
 
   .ToDo-Dark {
@@ -454,7 +454,6 @@ export default {
     height: 100%;
     margin: 10px 10px 10px 10px;
     overflow: auto;
-    z-index: 999;
   }
 
 </style>
