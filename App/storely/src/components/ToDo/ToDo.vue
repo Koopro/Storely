@@ -4,34 +4,38 @@
   </div>
   <div class="popup" v-if="showPopup">
     <h2>Neue ToDo</h2>
-    <input v-model="newTodo.name" placeholder="Name" />
-    <textarea v-model="newTodo.description" placeholder="Beschreibung"></textarea>
-    <input v-model="newTodo.dueDate" type="date" />
-    <input v-model="newTodo.dueTime" type="time" />
-    <label>
+    <input v-model="newTodo.name" class="name" placeholder="Name" />
+    <textarea v-model="newTodo.description" class="description" placeholder="Beschreibung"></textarea>
+    <input v-model="newTodo.dueDate" class="date" type="date" />
+    <input v-model="newTodo.dueTime" class="time" type="time" />
+    <label class="urgent">
       Dringend
-      <input v-model="newTodo.urgent" type="checkbox" />
+      <input v-model="newTodo.urgent" class="check-urgent" type="checkbox" />
     </label>
-    <button @click="createTodo">Hinzufügen</button>
-    <button @click="showPopup = false">Abbrechen</button>
+    <div class="buttons">
+      <button @click="createTodo" class="add">Hinzufügen</button>
+      <button @click="showPopup = false" class="cancel">Abbrechen</button>
+  </div>
   </div>
 
   <div class="popup" v-if="showEditPopup">
     <h2>ToDo bearbeiten</h2>
-    <input v-model="editTodo.name" placeholder="Name" />
-    <textarea v-model="editTodo.description" placeholder="Beschreibung"></textarea>
-    <input v-model="editTodo.dueDate" type="date" />
-    <input v-model="editTodo.dueTime" type="time" />
-    <label>
+    <input v-model="editTodo.name" class="name" placeholder="Name" />
+    <textarea v-model="editTodo.description" class="description" placeholder="Beschreibung"></textarea>
+    <input v-model="editTodo.dueDate" class="date" type="date" />
+    <input v-model="editTodo.dueTime" class="time" type="time" />
+    <label class="urgent">
       Dringend
-      <input v-model="editTodo.urgent" type="checkbox" />
+      <input v-model="editTodo.urgent" class="check-urgent" type="checkbox" />
     </label>
-    <label>
+    <label class="completed">
       Erledigt
-      <input v-model="editTodo.completed" type="checkbox" />
+      <input v-model="editTodo.completed" class="check-completed" type="checkbox" />
     </label>
-    <button @click="updateTodo">Speichern</button>
-    <button @click="showEditPopup = false">Abbrechen</button>
+    <div class="buttons">
+      <button @click="updateTodo" class="add">Speichern</button>
+      <button @click="showEditPopup = false" class="cancel">Abbrechen</button>
+    </div>
   </div>
 
   <div class="grid-container">
@@ -181,15 +185,118 @@ body {
 
 .popup {
   position: fixed;
+  width: 70%;
+  height: 50%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: white;
+  background-color: rgb(0, 0, 0);
   padding: 1rem;
-  border: 1px solid #ccc;
+  border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 10000;
+  overflow: hidden;
 }
+
+.name {
+  position: absolute;
+  margin-top: 30px;
+  left: 5%;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  border-radius: 10px;
+  padding-left: 10px;
+}
+
+.name:hover, .description:hover, .date:hover, .time:hover {
+  border-radius: 5px;
+}
+
+.description {
+  position: absolute;
+  margin-top: 80px;
+  width: 90%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  min-height: 30%;
+  max-height: 55%;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  border-radius: 10px;
+  padding-left: 10px;
+}
+
+.date {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  border-radius: 10px;
+  padding-left: 10px;
+}
+
+.time {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  right: 5%;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  border-radius: 10px;
+  padding-left: 10px;
+}
+
+.buttons {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 50%;
+  bottom: 40px;
+}
+
+.add, .cancel {
+  position: absolute;
+  height: auto;
+  width: 40%;
+  display: flex;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.add:hover, .cancel:hover {
+  border: 2px solid rgb(50, 252, 0);
+}
+
+.add {
+  left: 0;
+  background-color: white;
+  color: black;
+}
+
+.cancel {
+  right: 0;
+  background-color: white;
+  color: black;
+}
+
+.urgent {
+  position: absolute;
+  display: flex;
+  bottom: 100px;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.check-urgent {
+  margin-left: 10px;
+}
+
+
 
 .grid-container {
   display: flex;
@@ -292,5 +399,54 @@ body {
   right: 0;
   z-index: 999;
 }
+
+@media (max-width: 925px) {
+  .popup {
+    height: 70%;
+  }
+
+  .description {
+    margin-top: 25%;
+  }
+
+  .date {
+    margin-top: 15%;
+    left: 5%;
+    transform: unset;
+  }
+  .time {
+    margin-top: 15%;
+    right: 5%;
+    transform: unset;
+  }
+}
+
+
+@media (max-width: 617px) {
+    .description {
+      margin-top: 40%;
+    }
+
+    .buttons {
+      width: 100%;
+    }
+
+    .add {
+      left: 5px;
+    }
+
+    .cancel {
+      right: 5px;
+    }
+
+    .date {
+      margin-top: 30%;
+    }
+
+    .time {
+      margin-top: 30%;
+    }
+
+  }
 
 </style>

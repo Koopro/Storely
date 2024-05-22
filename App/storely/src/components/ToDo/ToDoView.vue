@@ -439,6 +439,7 @@ export default {
     right: 0;
     bottom: 0;
     background-color: white;
+    z-index: 999;
   }
 
   .ToDo-Dark {
@@ -453,6 +454,7 @@ export default {
     height: 100%;
     margin: 10px 10px 10px 10px;
     overflow: auto;
+    z-index: 999;
   }
 
 </style>

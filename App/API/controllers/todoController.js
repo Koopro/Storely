@@ -92,3 +92,19 @@ exports.todosget = async (req, res) => {
         res.status(500).send({ message: 'Server error', error: error.message });
     }
 };
+
+exports.todosput = async (req, res) => {
+    const userId = req.userData.userId; // Ensure user is authenticated
+    console.log("User ID:", userId);
+    const todoId = req.params.id;
+
+    try {
+        const todo = await Todo.findOneAndUpdate({ _id: todoId, user: userId }, req.body, { new: true });
+        if (!todo) {
+            return res.status(404).send({ message: 'Todo not found or you do not have permission to update it' });
+        }
+        res.status(200).send(todo);
+    } catch (error) {
+        res.status(500).send({ message: 'Server error', error: error.message });
+    }
+};
