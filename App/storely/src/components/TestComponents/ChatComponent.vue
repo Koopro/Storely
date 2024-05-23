@@ -32,12 +32,15 @@
             @keyup.enter="sendMessage"
             placeholder="Type a message..."
             class="chat-input"
+            @input="scrollToBottom"
         />
+        <v-icon>
+          <button @click="sendMessage"><v-icon>mdi-send</v-icon></button>
+        </v-icon>
       </div>
     </div>
   </div>
 </template>
-
 
 <script>
 import axios from 'axios';
@@ -105,6 +108,7 @@ export default {
           text: msg.text,
         }));
         console.log('Chat messages fetched:', selectedUser.value.messages);
+        nextTick(scrollToBottom);
       } catch (error) {
         console.error('Error fetching chat messages:', error);
       }
@@ -131,9 +135,11 @@ export default {
     };
 
     const scrollToBottom = () => {
-      if (chatMessagesRef.value) {
-        chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
-      }
+      nextTick(() => {
+        if (chatMessagesRef.value) {
+          chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
+        }
+      });
     };
 
     const setupSocket = () => {
@@ -234,12 +240,14 @@ export default {
 
     watch(selectedUser, (newVal, oldVal) => {
       console.log('selectedUser updated:', newVal);
+      nextTick(scrollToBottom); // Ensure the chat scrolls to bottom when a new user is selected
     });
 
     watch(
         () => selectedUser.value?.messages,
         (newVal, oldVal) => {
           console.log('selectedUser.messages updated:', newVal);
+          nextTick(scrollToBottom);
         },
         { deep: true }
     );
@@ -254,6 +262,7 @@ export default {
       getFriendPfp,
       displayFriendName,
       chatMessagesRef,
+      scrollToBottom,
     };
   },
 };
@@ -300,13 +309,13 @@ export default {
 }
 .my-message {
   margin-left: auto;
-  align-self: flex-end; /* Nachricht auf der rechten Seite anzeigen */
+  align-self: flex-end;
   background-color: #dda7f3;
   border-radius: 10px 10px 0 10px;
   padding: 10px;
-  width: fit-content; /* Breite der Nachricht basierend auf dem Inhalt */
-  max-width: 80%; /* Maximalbreite der Nachricht */
-  word-wrap: break-word; /* Text umbrechen, wenn er zu lang ist */
+  width: fit-content;
+  max-width: 80%;
+  word-wrap: break-word;
 }
 
 .other-message {
@@ -314,9 +323,9 @@ export default {
   background-color: #f1f0f0;
   border-radius: 10px 10px 10px 0;
   padding: 10px;
-  width: fit-content; /* Breite der Nachricht basierend auf dem Inhalt */
-  max-width: 80%; /* Maximalbreite der Nachricht */
-  word-wrap: break-word; /* Text umbrechen, wenn er zu lang ist */
+  width: fit-content;
+  max-width: 80%;
+  word-wrap: break-word;
 }
 .message-sender {
   font-weight: bold;
