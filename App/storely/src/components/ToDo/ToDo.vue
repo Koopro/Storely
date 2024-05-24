@@ -7,7 +7,12 @@
     <input v-model="newTodo.name" class="name" placeholder="Name" />
     <textarea v-model="newTodo.description" class="description" placeholder="Beschreibung"></textarea>
     <input v-model="newTodo.dueDate" class="date" type="date" />
-    <input v-model="newTodo.dueTime" class="time" type="time" />
+    <input v-model="newTodo.dueTime" 
+       class="time" 
+       type="time" 
+       :disabled="!newTodo.dueDate" 
+       :class="{ 'disabled-class': !newTodo.dueDate }" />
+
     <label class="urgentfield">
       Urgent
       <input v-model="newTodo.urgent" class="check-urgent" type="checkbox" />
@@ -23,18 +28,21 @@
     <input v-model="editTodo.name" class="name" placeholder="Name" />
     <textarea v-model="editTodo.description" class="description" placeholder="Beschreibung"></textarea>
     <input v-model="editTodo.dueDate" class="date" type="date" />
-    <input v-model="editTodo.dueTime" class="time" type="time" />
-    <label class="urgentfield">
-      Urgent
-      <input v-model="editTodo.urgent" class="check-urgent" type="checkbox" />
-    </label>
-    <label class="completed">
-      Completed
-      <input v-model="editTodo.completed" class="check-completed" type="checkbox" />
-    </label>
+    <input v-model="editTodo.dueTime" class="time" type="time" :disabled="!editTodo.dueDate" />
+    <div class="urgent-completed-wrap">
+      <label class="urgentfield">
+        Urgent
+        <input v-model="editTodo.urgent" class="check-urgent" type="checkbox" :disabled="isOverdue(editTodo)" />
+      </label>
+      <label class="completedfield">
+        Completed
+        <input v-model="editTodo.completed" class="check-completed" type="checkbox" />
+      </label>
+    </div>
     <div class="buttons">
-      <button @click="updateTodo" class="add">Add</button>
+      <button @click="updateTodo" class="add">Update</button>
       <button @click="showEditPopup = false" class="cancel">Cancel</button>
+      <button @click="deleteTodo" class="delete">Delete</button>
     </div>
   </div>
 
@@ -45,8 +53,13 @@
       :class="['grid-item', todoClass(todo)]"
       @click="selectTodo(todo)"
     >
+      <div v-if="!todo.completed && isOverdue(todo)" class="overdue-timer">⏰</div>
       <div class="todo-header">{{ todo.name }}</div>
       <div class="todo-description">{{ todo.description }}</div>
+      <div class="todo-datetime" v-if="todo.dueDate || todo.dueTime">
+        <div v-if="todo.dueDate">{{ formatDate(todo.dueDate) }}</div>
+        <div v-if="todo.dueTime">{{ formatTime(todo.dueTime) }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -85,12 +98,50 @@ export default {
   },
   computed: {
     sortedTodos() {
-      const urgentTodos = this.todos.filter(todo => todo.urgent && !todo.completed);
-      const normalTodos = this.todos.filter(todo => !todo.urgent && !todo.completed);
-      const completedTodos = this.todos.filter(todo => todo.completed);
-      return [...urgentTodos, ...normalTodos, ...completedTodos];
+      const sortedTodos = [...this.todos];
+
+      sortedTodos.sort((a, b) => {
+        // Sort by completed status
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+
+        // Sort by urgency
+        if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
+
+        // Sort by due date
+        if (a.dueDate && b.dueDate) {
+          const [dayA, monthA, yearA] = a.dueDate.split('.');
+          const [dayB, monthB, yearB] = b.dueDate.split('.');
+          const dateA = new Date(yearA, monthA - 1, dayA);
+          const dateB = new Date(yearB, monthB - 1, dayB);
+
+          if (dateA - dateB !== 0) return dateA - dateB;
+
+          // If dates are equal, sort by due time
+          if (a.dueTime && b.dueTime) {
+            const [hourA, minuteA] = a.dueTime.split(':');
+            const [hourB, minuteB] = b.dueTime.split(':');
+            const timeA = new Date();
+            timeA.setHours(hourA, minuteA, 0, 0);
+            const timeB = new Date();
+            timeB.setHours(hourB, minuteB, 0, 0);
+            return timeA - timeB;
+          }
+          
+          if (a.dueTime) return -1;
+          if (b.dueTime) return 1;
+        }
+
+        if (a.dueDate) return -1;
+        if (b.dueDate) return 1;
+
+        // If neither has a due date, maintain original order
+        return 0;
+      });
+
+      return sortedTodos;
     }
   },
+  
   methods: {
     async fetchTodos() {
       try {
@@ -105,15 +156,28 @@ export default {
         console.log('Error fetching todos: ' + error.response.data.message);
       }
     },
+    formatDateForAPI(date) {
+      if (!date) return '';
+      const [year, month, day] = date.split('-');
+      return `${day}.${month}.${year}`;
+    },
+    formatDateForDisplay(date) {
+      if (!date) return '';
+      const [day, month, year] = date.split('.');
+      return `${year}-${month}-${day}`;
+    },
     async createTodo() {
-      if (!this.selectedListId) {
+      const nowselectedlist = localStorage.getItem('selectedListId');
+
+      if (!nowselectedlist) {
         alert('Select a list in order to create a new todo!');
         return;
       }
 
       const todoData = {
         ...this.newTodo,
-        list: this.selectedListId
+        dueDate: this.formatDateForAPI(this.newTodo.dueDate),
+        list: nowselectedlist
       };
 
       try {
@@ -123,7 +187,6 @@ export default {
           }
         });
         if (response.status === 201) {
-          console.log('Todo created successfully!');
           this.todos.push(response.data);
           this.resetNewTodo();
           this.showPopup = false;
@@ -144,12 +207,20 @@ export default {
     },
     selectTodo(todo) {
       this.editIndex = this.todos.indexOf(todo);
-      this.editTodo = { ...todo };
+      this.editTodo = { 
+        ...todo,
+        dueDate: this.formatDateForDisplay(todo.dueDate)
+      };
       this.showEditPopup = true;
     },
     async updateTodo() {
+      const todoData = {
+        ...this.editTodo,
+        dueDate: this.formatDateForAPI(this.editTodo.dueDate)
+      };
+
       try {
-        const response = await axios.put(`${this.apiUrl}/todos/${this.editTodo._id}`, this.editTodo, {
+        const response = await axios.put(`${this.apiUrl}/todos/${this.editTodo._id}`, todoData, {
           headers: {
             'Authorization': this.authToken
           }
@@ -162,16 +233,86 @@ export default {
         console.log('Error updating todo: ' + error.response.data.message);
       }
     },
+    async deleteTodo() {
+      try {
+        const response = await axios.delete(`${this.apiUrl}/todos/${this.editTodo._id}`, {
+          headers: {
+            'Authorization': this.authToken
+          }
+        });
+        if (response.status === 200) {
+          this.todos.splice(this.editIndex, 1);
+          this.showEditPopup = false;
+        }
+      } catch (error) {
+        console.log('Error deleting todo: ' + error.response.data.message);
+      }
+    },
+    async deleteTodoById(todoId) {
+      try {
+        const response = await axios.delete(`${this.apiUrl}/todos/${todoId}`, {
+          headers: {
+            'Authorization': this.authToken
+          }
+        });
+        if (response.status === 200) {
+          this.todos = this.todos.filter(todo => todo._id !== todoId);
+        }
+      } catch (error) {
+        console.log('Error deleting todo: ' + error.response.data.message);
+      }
+    },
     completeTodo(todo) {
       todo.completed = true;
       this.updateTodo();
     },
     todoClass(todo) {
       if (todo.completed) return 'completed';
+      if (this.isOverdue(todo)) return 'urgent';
       if (todo.urgent) return 'urgent';
       return 'normal';
+    },
+    isOverdue(todo) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+
+      const currentDate = `${year}-${month}-${day}`;
+
+      let dueDate = null;
+      if (todo.dueDate) {
+        const [day, month, year] = todo.dueDate.split('.');
+        dueDate = new Date(`${year}-${month}-${day}`);
+      }
+
+      let dueTime = null;
+      if (todo.dueDate && todo.dueTime) {
+        dueTime = new Date(`${year}-${month}-${day}T${todo.dueTime}:00`);
+      }
+
+      // Überprüfung, ob dueDate existiert und ob das Enddatum des Tages in der Vergangenheit liegt
+      if (dueDate && dueDate < new Date(year, month - 1, day)) {
+        return true;
+      }
+
+      // Wenn das Datum heute ist und die Uhrzeit in der Vergangenheit liegt
+      if (dueDate && dueDate.toDateString() === now.toDateString()) {
+        if (dueTime && dueTime < now) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    formatDate(date) {
+      const [day, month, year] = date.split('.');
+      return new Date(`${year}-${month}-${day}`).toLocaleDateString();
+    },
+    formatTime(time) {
+      return time ? new Date(`1970-01-01T${time}:00`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
     }
-  }, 
+  },
   created() {
     this.fetchTodos();
   }
@@ -180,124 +321,105 @@ export default {
 
 <style scoped>
 body {
-  background-color: rgba(0, 0, 0, alpha);
+  background-color: #f5f5f5;
+  font-family: 'Roboto', sans-serif;
 }
 
 .popup {
   position: fixed;
-  width: 70%;
-  height: 50%;
+  width: 80%;
+  max-width: 500px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgb(0, 0, 0);
-  padding: 1rem;
-  border-radius: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   z-index: 10000;
   overflow: hidden;
 }
 
-.name {
-  position: absolute;
-  margin-top: 30px;
-  left: 5%;
-  border: 2px solid #ffffff;
-  color: #ffffff;
-  border-radius: 10px;
-  padding-left: 10px;
+.popup h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
 }
 
-.name:hover, .description:hover, .date:hover, .time:hover {
+input, textarea {
+  width: calc(100% - 2rem);
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
   border-radius: 5px;
+  font-size: 1rem;
 }
 
-.description {
-  position: absolute;
-  margin-top: 80px;
-  width: 90%;
-  left: 50%;
-  transform: translate(-50%, 0);
-  min-height: 30%;
-  max-height: 55%;
-  border: 2px solid #ffffff;
-  color: #ffffff;
-  border-radius: 10px;
-  padding-left: 10px;
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #4caf50;
 }
 
-.date {
-  position: absolute;
+textarea {
+  height: 100px;
+  resize: none;
+}
+
+.urgent-completed-wrap {
   display: flex;
-  justify-content: center;
-  margin-top: 30px;
-  left: 50%;
-  transform: translate(-50%, 0);
-  border: 2px solid #ffffff;
-  color: #ffffff;
-  border-radius: 10px;
-  padding-left: 10px;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
-.time {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-  right: 5%;
-  border: 2px solid #ffffff;
-  color: #ffffff;
-  border-radius: 10px;
-  padding-left: 10px;
+label {
+  font-size: 1rem;
+  color: #333;
+}
+
+.check-urgent, .check-completed {
+  margin-left: 0.5rem;
 }
 
 .buttons {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 50%;
-  bottom: 40px;
-}
-
-.add, .cancel {
-  position: absolute;
-  height: auto;
-  width: 40%;
   display: flex;
-  justify-content: center;
-  border-radius: 10px;
+  justify-content: space-between;
 }
 
-.add:hover, .cancel:hover {
-  border: 2px solid rgb(50, 252, 0);
+.add, .cancel, .delete {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .add {
-  left: 0;
-  background-color: white;
-  color: black;
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.add:hover {
+  background-color: #45a049;
 }
 
 .cancel {
-  right: 0;
-  background-color: white;
-  color: black;
+  background-color: #f44336;
+  color: #fff;
 }
 
-.urgentfield {
-  position: absolute;
-  display: flex;
-  bottom: 100px;
-  left: 50%;
-  transform: translate(-50%, 0);
-  color: white;
+.cancel:hover {
+  background-color: #e53935;
 }
 
-.check-urgent {
-  margin-left: 10px;
+.delete {
+  background-color: #ff5722;
+  color: #fff;
 }
 
-
+.delete:hover {
+  background-color: #e64a19;
+}
 
 .grid-container {
   display: flex;
@@ -305,13 +427,15 @@ body {
   width: 100%;
   justify-content: center;
   align-items: flex-start;
-  gap: 1%; /* Adds the gap between rows and columns */
+  gap: 1%;
+  padding: 1rem;
+  margin-bottom: 45px;
 }
 
 .grid-item {
-  flex: 1 1 calc(33.33% - 1%); /* Calculate the width including the gap */
+  flex: 1 1 calc(33.33% - 1%);
   max-width: calc(33.33% - 1%);
-  margin-bottom: 1%; /* Adds the gap between rows */
+  margin-bottom: 1%;
   display: flex;
   flex-direction: column;
   border: 1px solid #ccc;
@@ -325,8 +449,12 @@ body {
   align-items: center;
   font-size: 1.5rem;
   box-sizing: border-box;
+  transition: transform 0.3s;
 }
 
+.grid-item:hover {
+  transform: translateY(-5px);
+}
 
 .grid-item.urgent {
   background-color: #ff6b6b;
@@ -338,28 +466,52 @@ body {
 
 .grid-item.completed {
   background-color: #81c784;
+  text-decoration: line-through black;
 }
 
 .todo-header {
+  position: absolute;
+  top: 5%;
   margin-left: 5%;
   margin-top: 2%;
   margin-right: 5%;
-  height: 20%;
   font-size: 1.5rem;
   font-weight: bold;
   overflow-x: auto;
   overflow-y: hidden;
-  color: black; /* Ensure text is always black */
+  color: black;
 }
 
 .todo-description {
+  position: absolute;
+  top: 25%;
   margin-left: 5%;
   margin-right: 5%;
-  height: 85%;
+  margin-top: 2%;
   font-size: 1rem;
   overflow-x: auto;
   overflow-y: auto;
-  color: black; /* Ensure text is always black */
+  color: black;
+}
+
+.todo-datetime {
+  margin-left: 5%;
+  margin-right: 5%;
+  margin-top: auto;
+  font-size: 1rem;
+  text-align: center;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.overdue-timer {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 2rem;
+  color: #ff0000;
 }
 
 .todo-details {
@@ -389,6 +541,18 @@ body {
   border-radius: 10px;
   background-color: #707070;
   color: rgb(0, 0, 0);
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.disabled-class {
+  border: 2px solid red;
+}
+
+.add-todo-button:hover {
+  background-color: #5a5a5a;
 }
 
 .add-todo-button-wrap {
@@ -422,32 +586,29 @@ body {
   }
 }
 
-
 @media (max-width: 617px) {
-    .description {
-      margin-top: 40%;
-    }
-
-    .buttons {
-      width: 100%;
-    }
-
-    .add {
-      left: 5px;
-    }
-
-    .cancel {
-      right: 5px;
-    }
-
-    .date {
-      margin-top: 30%;
-    }
-
-    .time {
-      margin-top: 30%;
-    }
-
+  .description {
+    margin-top: 40%;
   }
 
+  .buttons {
+    width: 100%;
+  }
+
+  .add {
+    left: 5px;
+  }
+
+  .cancel {
+    right: 5px;
+  }
+
+  .date {
+    margin-top: 30%;
+  }
+
+  .time {
+    margin-top: 30%;
+  }
+}
 </style>

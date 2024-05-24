@@ -6,7 +6,6 @@
   <div class="menu" :class="{ 'dark-menu': isDarkMode }">
     <div class="inner-menu">
       <ul>
-        <!-- Automatisch Listenpunkte generieren basierend auf verfügbaren Listen -->
         <li v-for="list in lists" :key="list._id" 
         :style="{
           backgroundColor: list.color,
@@ -25,25 +24,24 @@
   </div>
   <div class="background-white" :class="{ 'background-dark': isDarkMode }"></div>
   
-  <!--List Popup-->
+  <!-- List Popup -->
   <div class="popup-list-wrap">
     <div class="popup-add-list" :class="{ 'popup-add-list-DARK': isDarkMode }">
       <h1 class="popup-add-list-header">Wie soll die neue Liste heißen?</h1>
       <input type="text" class="popup-add-list-input" placeholder="Listenname" ref="listNameInput" :class="{ 'popup-add-list-input-DARK': isDarkMode }">
       <input type="color" class="popup-add-list-color" v-model="listColor">
       <button class="popup-add-list-button" :class="{ 'popup-add-list-button-DARK': isDarkMode }" @click="addList">Hinzufügen</button>
+      <button class="popup-add-list-cancel-button" @click="closePopup">❌</button>
     </div>
   </div>
   <div class="popup-background" :class="{ 'popup-background-DARK': isDarkMode }"></div>
 
-
-  <!--ToDo-->
+  <!-- ToDo -->
   <div class="ToDo" :class="{ 'ToDo-Dark': isDarkMode }">
     <div class="ToDo-body">
       <ToDo />
     </div>
   </div>
-
 </template>
 
 <script>
@@ -227,6 +225,10 @@ export default {
 };
 </script>
 
+
+
+
+
 <style scoped>
   * {
     margin: 0;
@@ -383,6 +385,13 @@ export default {
     right: 10px;
     height: 30px;
     width: 10%;
+  }
+
+  .popup-add-list-cancel-button {
+    position: absolute; 
+    left: 10px;
+    top: 10px;
+    background-color: rgba(0, 0, 0, 0);
   }
 
   ul {

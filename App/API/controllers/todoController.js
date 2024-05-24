@@ -5,10 +5,10 @@ const cors = require('cors');
 
 exports.listspost = async (req, res) => {
     const { name, color } = req.body;
-    const userId = req.userData.userId; // Assuming `req.user` is populated from your authentication middleware
+    const userId = req.userData.userId;
 
     if (!name) {
-        return res.status(400).send({ message: 'Name are required' });
+        return res.status(400).send({ message: 'Name is required' });
     }
 
     const newList = new List({
@@ -24,8 +24,9 @@ exports.listspost = async (req, res) => {
         res.status(500).send({ message: 'Server error', error: error.message });
     }
 };
+
 exports.listsget = async (req, res) => {
-    const userId = req.userData.userId; // Ensure user is authenticated
+    const userId = req.userData.userId;
 
     try {
         const lists = await List.find({ user: userId });
@@ -35,9 +36,8 @@ exports.listsget = async (req, res) => {
     }
 };
 
-exports.listid = async (req, res) => {
-    const userId = req.userData.userId; // Correct access based on your middleware
-    // Ensure user is authenticated
+exports.listdelete = async (req, res) => {
+    const userId = req.userData.userId;
     const listId = req.params.id;
 
     try {
@@ -45,7 +45,11 @@ exports.listid = async (req, res) => {
         if (!list) {
             return res.status(404).send({ message: 'List not found or you do not have permission to delete it' });
         }
-        res.status(200).send({ message: 'List successfully deleted' });
+        
+        // Delete all todos associated with this list
+        await Todo.deleteMany({ list: listId, user: userId });
+
+        res.status(200).send({ message: 'List and associated todos successfully deleted' });
     } catch (error) {
         console.error("Error during deletion:", error);
         res.status(500).send(error);
@@ -54,8 +58,8 @@ exports.listid = async (req, res) => {
 
 exports.todospost = async (req, res) => {
     const { name, description, dueDate, dueTime, urgent, completed } = req.body;
-    const userId = req.userData.userId; // Angenommen, req.userData wird von der Authentifizierungsmiddleware befüllt
-    const listId = req.body.list; // Annahme: `selectedListId` wird im Anfragekörper gesendet
+    const userId = req.userData.userId;
+    const listId = req.body.list;
 
     if (!name) {
         return res.status(400).send({ message: 'Name is required' });
@@ -80,10 +84,9 @@ exports.todospost = async (req, res) => {
     }
 };
 
-
 exports.todosget = async (req, res) => {
-    const userId = req.userData.userId; // Ensure user is authenticated
-    const listId = req.query.list; // listId aus query parameter
+    const userId = req.userData.userId;
+    const listId = req.query.list;
 
     try {
         const todos = await Todo.find({ user: userId, list: listId });
@@ -94,8 +97,7 @@ exports.todosget = async (req, res) => {
 };
 
 exports.todosput = async (req, res) => {
-    const userId = req.userData.userId; // Ensure user is authenticated
-    console.log("User ID:", userId);
+    const userId = req.userData.userId;
     const todoId = req.params.id;
 
     try {
@@ -104,6 +106,21 @@ exports.todosput = async (req, res) => {
             return res.status(404).send({ message: 'Todo not found or you do not have permission to update it' });
         }
         res.status(200).send(todo);
+    } catch (error) {
+        res.status(500).send({ message: 'Server error', error: error.message });
+    }
+};
+
+exports.tododelete = async (req, res) => {
+    const userId = req.userData.userId;
+    const todoId = req.params.id;
+
+    try {
+        const todo = await Todo.findOneAndDelete({ _id: todoId, user: userId });
+        if (!todo) {
+            return res.status(404).send({ message: 'Todo not found or you do not have permission to delete it' });
+        }
+        res.status(200).send({ message: 'Todo successfully deleted' });
     } catch (error) {
         res.status(500).send({ message: 'Server error', error: error.message });
     }

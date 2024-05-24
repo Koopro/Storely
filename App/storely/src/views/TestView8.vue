@@ -1,7 +1,19 @@
 <template>
-  <div :class="{ dark: darkMode }">
-    <!-- Ihr Template-Code -->
-    <p>Dark Mode ist {{ darkMode ? 'aktiv' : 'inaktiv' }}</p>
+  <div id="app">
+    <h1>Datum und Zeit Eingabe</h1>
+    <div class="input-container">
+      <label for="date">Datum:</label>
+      <input type="date" v-model="date" id="date">
+    </div>
+    <div class="input-container">
+      <label for="time">Zeit:</label>
+      <input type="time" v-model="time" id="time">
+    </div>
+    <button @click="checkDateTime">Prüfen</button>
+    <div v-if="result !== null" class="result">
+      <p v-if="result">Die angegebene Datum und Zeit liegt in der Vergangenheit.</p>
+      <p v-else>Die angegebene Datum und Zeit liegt in der Zukunft oder ist aktuell.</p>
+    </div>
   </div>
 </template>
 
@@ -9,52 +21,57 @@
 export default {
   data() {
     return {
-      darkMode: JSON.parse(localStorage.getItem('darkMode')) || false
+      date: '',
+      time: '',
+      result: null
     };
   },
-  created() {
-    // Initial setzen des Local Storage-Werts und Event auslösen
-    localStorage.setItem('darkMode', JSON.stringify(this.darkMode));
-    window.dispatchEvent(new CustomEvent('darkMode-localstorage-changed', {
-      detail: {
-        storage: localStorage.getItem('darkMode')
-      }
-    }));
-  },
-  mounted() {
-    // Fügen Sie einen benutzerdefinierten Event-Listener hinzu
-    window.addEventListener('darkMode-localstorage-changed', (event) => {
-      this.darkMode = JSON.parse(event.detail.storage);
-    });
-  },
-  beforeDestroy() {
-    // Entfernen Sie Event-Listener um Speicherlecks zu vermeiden
-    window.removeEventListener('darkMode-localstorage-changed', this.onCustomStorageChange);
-  },
   methods: {
-    onCustomStorageChange(event) {
-      if (event.key === 'darkMode') {
-        console.log('Custom Storage-Event ausgelöst:', event);
-        this.darkMode = JSON.parse(event.newValue);
+    checkDateTime() {
+      if (this.date && this.time) {
+        console.log('Date:', this.date, ' and Time:', this.time);
+        const inputDateTime = new Date(`${this.date}T${this.time}`);
+        const now = new Date();
+        this.result = inputDateTime < now;
+      } else {
+        alert('Bitte Datum und Zeit eingeben');
       }
-    },
-    toggleDarkMode() {
-      // Dark Mode umschalten und im localStorage speichern
-      this.darkMode = !this.darkMode;
-      localStorage.setItem('darkMode', JSON.stringify(this.darkMode));
-      window.dispatchEvent(new CustomEvent('darkMode-localstorage-changed', {
-        detail: {
-          storage: localStorage.getItem('darkMode')
-        }
-      }));
     }
   }
 };
 </script>
 
 <style scoped>
-.dark {
-  background-color: #333;
-  color: #fff;
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  text-align: center;
+  margin-top: 60px;
+  background-color: white;
+}
+
+.input-container {
+  margin-bottom: 20px;
+}
+
+label {
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #42b983;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #389e6f;
+}
+
+.result {
+  margin-top: 20px;
+  font-size: 1.2em;
 }
 </style>
