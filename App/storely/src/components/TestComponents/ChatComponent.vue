@@ -97,6 +97,11 @@ export default {
     const fetchChatMessages = async () => {
       if (!selectedUser.value) return;
       const chatId = getChatId();
+      if (!chatId) {
+        console.error('Chat ID is invalid.');
+        return;
+      }
+      console.log(`Fetching chat messages for chat ID: ${chatId}`);
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/chats/${chatId}`, {
           headers: {
@@ -111,6 +116,9 @@ export default {
         nextTick(scrollToBottom);
       } catch (error) {
         console.error('Error fetching chat messages:', error);
+        if (error.response && error.response.status === 404) {
+          console.error('Chat not found, please check the chat ID:', chatId);
+        }
       }
     };
 
@@ -196,12 +204,16 @@ export default {
 
     const getChatId = () => {
       if (!selectedUser.value || !getUser.value) return '';
-      const userIds = [
-        getUser.value._id,
-        selectedUser.value.requester._id === getUser.value._id
-            ? selectedUser.value.recipient._id
-            : selectedUser.value.requester._id
-      ].sort();
+      const requesterId = selectedUser.value.requester._id;
+      const recipientId = selectedUser.value.recipient._id;
+      const userId = getUser.value._id;
+
+      console.log(`User ID: ${userId}`);
+      console.log(`Requester ID: ${requesterId}`);
+      console.log(`Recipient ID: ${recipientId}`);
+
+      const otherUserId = requesterId === userId ? recipientId : requesterId;
+      const userIds = [userId, otherUserId].sort();
       const chatId = `${userIds[0]}-${userIds[1]}`;
       console.log('Generated chat ID:', chatId);
       return chatId;
@@ -267,6 +279,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .no-friends {

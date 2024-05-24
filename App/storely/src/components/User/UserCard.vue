@@ -1,31 +1,43 @@
 <template>
   <div v-if="user" class="profile-container">
-    <v-card class="profile-card" elevation="2">
-      <!-- Profile Image and Edit Icon -->
-<!-- Profile Image and Status Icon -->
-      <div class="profile-image-section">
-        <img :src="user.profileImageUrl" alt="Profile Image" class="profile-image">
-        <v-btn icon class="edit-image-btn" v-if="editMode" @click="triggerFileInput">
-          <v-icon color="primary">mdi-pencil</v-icon>
-        </v-btn>
-      </div>
-
+    <v-card class="profile-card" elevation="3">
       <v-card-text class="text-center">
+        <div class="profile-image-section">
+          <img :src="user.profileImageUrl" alt="Profile Image" class="profile-image">
+          <v-btn icon class="edit-image-btn" v-if="editMode" @click="triggerFileInput">
+            <v-icon color="primary">mdi-pencil</v-icon>
+          </v-btn>
+        </div>
         <h2 class="profile-name">{{ user.username }}</h2>
         <div v-if="editMode" class="edit-fields">
-          <v-text-field solo v-model="editableUsername" placeholder="Username"></v-text-field>
-          <v-text-field solo v-model="editableName" placeholder="Name"></v-text-field>
-          <v-text-field solo v-model="editableLastname" placeholder="Last Name"></v-text-field>
+          <v-text-field class="input" variant="outlined" v-model="editableUsername" placeholder="Username"></v-text-field>
+          <v-text-field class="input" variant="outlined" v-model="editableName" placeholder="Name"></v-text-field>
+          <v-text-field class="input" variant="outlined" v-model="editableLastname" placeholder="Last Name"></v-text-field>
         </div>
         <v-btn text v-if="!editMode" @click="toggleEditMode">Edit Profile</v-btn>
         <div v-if="editMode" class="action-buttons">
           <v-btn color="success" @click="saveProfile" :disabled="isSaving">Save</v-btn>
           <v-btn text @click="cancelEdit">Cancel</v-btn>
         </div>
+        <v-btn color="red" @click="confirmDeleteAccount" class="delete-btn mt-4">Delete Account</v-btn>
       </v-card-text>
 
       <input type="file" ref="fileInput" @change="previewImage" hidden>
     </v-card>
+
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="deleteDialog" persistent max-width="400">
+      <v-card>
+        <v-card-title class="headline">Confirm Account Deletion</v-card-title>
+        <v-card-text>Are you sure you want to delete your account? This action cannot be undone.</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="purple darken-1" text @click="deleteDialog = false">Cancel</v-btn>
+          <v-btn color="red darken-1" text @click="deleteAccount">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-snackbar v-model="alert.show" :color="alert.type" timeout="3000">
       {{ alert.message }}
       <v-btn color="white" text @click="alert.show = false">Close</v-btn>
@@ -33,52 +45,57 @@
   </div>
 </template>
 
-
 <style scoped>
+
+.input{
+  color: white;
+}
+
 .profile-container {
   display: flex;
   justify-content: center;
+  align-items: center; /* Center the card vertically */
   padding: 2vh 0;
 }
 
 .profile-card {
-  max-width: 90vw;
-  min-width: 280px; /* Ensure minimum readability and usability */
-  background: rgb(76, 76, 76);
-  padding: 5vh;
-  border-radius: 8px; /* Soft rounded corners for a modern look */
+  width: 100%;
+  max-width: 400px; /* Restrict maximum width for better readability */
+  background-color: #424242; /* Dark background for modern look */
+  color: #000000; /* White text for contrast */
+  padding: 20px;
+  border-radius: 12px; /* Smooth rounded corners */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
 .profile-image-section {
   position: relative;
   text-align: center;
-  margin-bottom: 2vh;
+  margin-bottom: 16px;
 }
 
 .profile-image {
-  width: 30vw;
-  height: 30vw;
-  max-width: 120px; /* Limit the size on larger screens */
-  max-height: 120px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #eee;
+  border: 4px solid #fff; /* White border for better visibility */
 }
 
 .profile-name, h2 {
-  margin-bottom: 2vh;
-  font-size: 2rem;
-  max-size: 22px; /* Prevent the font from becoming too large on big screens */
-  font-weight: bold;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: white;
 }
 
 .edit-image-btn {
   position: absolute;
   right: 50%;
-  bottom: 10%;
+  bottom: 0;
   transform: translateX(50%);
   background-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
 .text-center {
@@ -86,41 +103,40 @@
 }
 
 .edit-fields .v-text-field {
-  margin-bottom: 2vh;
-  width: 80%; /* Ensure fields are not too wide on large screens */
+  margin-bottom: 16px;
+  width: 100%; /* Ensure fields take full width */
 }
 
 .action-buttons {
   display: flex;
-  flex-direction: column; /* Stack buttons vertically on smaller screens */
-  align-items: center;
+  justify-content: center;
   gap: 10px; /* Space between buttons */
-  margin-top: 2vh;
+  margin-top: 16px;
 }
 
-@media (min-width: 600px) {
-  .action-buttons {
-    flex-direction: row; /* Align buttons horizontally on larger screens */
-    justify-content: space-around;
-  }
+.delete-btn .v-btn{
+  background-color: red;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
 }
 
 .v-btn {
   border-radius: 25px;
 }
+
+.v-btn.mt-4 {
+  margin-top: 16px;
+}
 </style>
-
-
 
 <script>
 import axios from 'axios';
-import UserStatus from './UserStatus.vue';
-
 
 export default {
-  components: {
-    UserStatus
-  },
   data() {
     return {
       user: null,
@@ -130,6 +146,7 @@ export default {
       editableName: '',
       editableLastname: '',
       editableUsername: '',
+      deleteDialog: false,
       alert: {
         show: false,
         type: '',
@@ -191,14 +208,29 @@ export default {
         this.isSaving = false;
       }
     },
-  cancelEdit() {
-    this.editMode = false;
-    this.fetchUserProfile(); // Reset to original data
-  },
-  toggleEditMode() {
-    this.editMode = !this.editMode;
-  },
+    cancelEdit() {
+      this.editMode = false;
+      this.fetchUserProfile(); // Reset to original data
+    },
+    toggleEditMode() {
+      this.editMode = !this.editMode;
+    },
+    confirmDeleteAccount() {
+      this.deleteDialog = true;
+    },
+    async deleteAccount() {
+      this.deleteDialog = false;
+      try {
+        await axios.delete(`${process.env.VUE_APP_API_URL}/api/user/${this.user._id}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },
+        });
+        this.alert = { show: true, type: 'success', message: 'Account deleted successfully!' };
+        // Redirect or perform necessary actions after account deletion
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        this.alert = { show: true, type: 'error', message: 'Failed to delete account.' };
+      }
+    },
   },
 };
 </script>
-
