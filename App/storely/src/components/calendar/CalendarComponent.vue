@@ -373,10 +373,11 @@ button:active {
 .places-list {
   background: white;
   border: 1px solid #ccc;
+  border-radius: 5px;
   max-height: 150px;
   overflow-y: auto;
   position: absolute;
-  width: 90%;
+  width: 77.5%;
   z-index: 1;
   list-style: none;
   padding: 0;
@@ -396,4 +397,6 @@ button:active {
   font-size: 24px;
   color: red;
 }
+
+
 </style>
