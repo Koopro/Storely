@@ -71,7 +71,7 @@ export default {
     return {
       currentDate: new Date(),
       weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
-      events: [],
+      events: JSON.parse(localStorage.getItem('events')) || [],
       addEventPopupVisible: false,
       newEvent: {
         date: '',
@@ -170,13 +170,12 @@ export default {
     },
     showAddEventPopup() {
       this.addEventPopupVisible = true;
-      this.resetForm();  // Formular zurücksetzen, wenn Popup angezeigt wird
+      this.resetForm();
     },
     closeAddEventPopup() {
       this.addEventPopupVisible = false;
     },
     closeAddEventPopupOutside(event) {
-      // Überprüfen, ob der Klick innerhalb der places-list oder des addEventPopup Elements aufgetreten ist
       if (this.$refs.addEventPopup && !this.$refs.addEventPopup.contains(event.target) && !event.target.closest('.places-list')) {
         this.addEventPopupVisible = false;
       }
@@ -195,23 +194,15 @@ export default {
           event.location = locationData ? locationData.display_name : this.newEvent.location;
         }
         this.events.push(event);
-        this.resetForm();
-        this.addEventPopupVisible = false;
-        this.places = [];
+        this.saveEventsToLocalStorage();
+        this.closeAddEventPopup();
       }
     },
-    resetForm() {
-      this.newEvent = {
-        date: '',
-        name: '',
-        hasTime: false,
-        time: '',
-        hasLocation: false,
-        location: ''
-      };
-      this.places = [];
-    },
     async searchPlaces(query) {
+      if (query.length < 3) {
+        this.places = [];
+        return;
+      }
       try {
         const response = await axios.get(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=5`);
         this.places = response.data;
@@ -225,8 +216,39 @@ export default {
       this.places = [];
     },
     deleteEvent(eventToDelete) {
-      this.events = this.events.filter(event => event !== eventToDelete);
+      console.log('Event to delete:', eventToDelete); // Debugging
+
+      this.events = this.events.filter(event => {
+        return !(event.date === eventToDelete.date &&
+            event.name === eventToDelete.name &&
+            (event.time ? event.time === eventToDelete.time : true) &&
+            (event.location ? event.location === eventToDelete.location : true));
+      });
+
+      console.log('Updated events:', this.events); // Debugging
+
+      this.saveEventsToLocalStorage();
       this.closeEventPopup();
+    },
+    saveEventsToLocalStorage() {
+      localStorage.setItem('events', JSON.stringify(this.events));
+    },
+    resetForm() {
+      this.newEvent = {
+        date: '',
+        name: '',
+        hasTime: false,
+        time: '',
+        hasLocation: false,
+        location: ''
+      };
+      this.places = [];
+    }
+  },
+  mounted() {
+    const savedEvents = localStorage.getItem('events');
+    if (savedEvents) {
+      this.events = JSON.parse(savedEvents);
     }
   }
 };
@@ -397,6 +419,4 @@ button:active {
   font-size: 24px;
   color: red;
 }
-
-
 </style>
