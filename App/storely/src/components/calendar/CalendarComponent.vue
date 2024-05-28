@@ -62,6 +62,7 @@
   </div>
 </template>
 
+
 <script>
 import axios from 'axios';
 
@@ -71,7 +72,7 @@ export default {
     return {
       currentDate: new Date(),
       weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
-      events: JSON.parse(localStorage.getItem('events')) || [],
+      events: [],
       addEventPopupVisible: false,
       newEvent: {
         date: '',
@@ -182,20 +183,24 @@ export default {
     },
     async addEvent() {
       if (this.newEvent.date && this.newEvent.name) {
+        const token = localStorage.getItem('authToken');
         const event = {
           date: this.newEvent.date,
-          name: this.newEvent.name
+          name: this.newEvent.name,
+          time: this.newEvent.hasTime ? this.newEvent.time : undefined,
+          location: this.newEvent.hasLocation ? this.newEvent.location : undefined,
         };
-        if (this.newEvent.hasTime) {
-          event.time = this.newEvent.time;
+        try {
+          const response = await axios.post(`${process.env.VUE_APP_API_URL}/api/events`, event, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          this.events.push(response.data);
+          this.closeAddEventPopup();
+        } catch (error) {
+          console.error('Error adding event:', error);
         }
-        if (this.newEvent.hasLocation) {
-          const locationData = this.places.find(place => place.display_name === this.newEvent.location);
-          event.location = locationData ? locationData.display_name : this.newEvent.location;
-        }
-        this.events.push(event);
-        this.saveEventsToLocalStorage();
-        this.closeAddEventPopup();
       }
     },
     async searchPlaces(query) {
@@ -215,23 +220,32 @@ export default {
       this.newEvent.location = place.display_name;
       this.places = [];
     },
-    deleteEvent(eventToDelete) {
-      console.log('Event to delete:', eventToDelete); // Debugging
-
-      this.events = this.events.filter(event => {
-        return !(event.date === eventToDelete.date &&
-            event.name === eventToDelete.name &&
-            (event.time ? event.time === eventToDelete.time : true) &&
-            (event.location ? event.location === eventToDelete.location : true));
-      });
-
-      console.log('Updated events:', this.events); // Debugging
-
-      this.saveEventsToLocalStorage();
-      this.closeEventPopup();
+    async deleteEvent(eventToDelete) {
+      const token = localStorage.getItem('authToken');
+      try {
+        await axios.delete(`${process.env.VUE_APP_API_URL}/api/events/${eventToDelete._id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        this.events = this.events.filter(event => event._id !== eventToDelete._id);
+        this.closeEventPopup();
+      } catch (error) {
+        console.error('Error deleting event:', error);
+      }
     },
-    saveEventsToLocalStorage() {
-      localStorage.setItem('events', JSON.stringify(this.events));
+    async fetchEvents() {
+      const token = localStorage.getItem('authToken');
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/events`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        this.events = response.data;
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
     },
     resetForm() {
       this.newEvent = {
@@ -246,10 +260,7 @@ export default {
     }
   },
   mounted() {
-    const savedEvents = localStorage.getItem('events');
-    if (savedEvents) {
-      this.events = JSON.parse(savedEvents);
-    }
+    this.fetchEvents();
   }
 };
 </script>

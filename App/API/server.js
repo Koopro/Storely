@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -12,6 +12,7 @@ const todoRoutes = require('./routes/todoRoutes');
 const morgan = require('morgan');
 const Chat = require('./models/Chat');
 const User = require('./models/User');
+const eventRoutes = require('./routes/eventRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,7 @@ app.use("/api", authRoutes);
 app.use("/api", userProfileRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api", todoRoutes);
+app.use("/api", eventRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.static(path.join(__dirname, "public")));
@@ -102,25 +104,39 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} joining chat: ${chatId}`);
     socket.join(chatId);
 
-    const chat = await Chat.findOne({ chatId });
-    if (chat) {
+    try {
+      let chat = await Chat.findOne({ chatId });
+      if (!chat) {
+        chat = new Chat({ chatId, messages: [] });
+        await chat.save();
+        console.log(`Chat created with ID: ${chatId}`);
+      }
       socket.emit("loadOldMessages", chat.messages);
+    } catch (error) {
+      console.error('Error joining chat:', error);
+      socket.emit("error", { message: "Error joining chat." });
     }
   });
 
   socket.on("sendMessage", async ({ chatId, userId, text, mediaUrl, mediaType }) => {
-    const user = await User.findById(userId);
-    const username = user ? user.username : 'Unknown';
-    const message = { text, userId, username, index: Date.now(), mediaUrl, mediaType };
+    try {
+      const user = await User.findById(userId);
+      const username = user ? user.username : 'Unknown';
+      const message = { text, userId, username, index: Date.now(), mediaUrl, mediaType };
 
-    await Chat.findOneAndUpdate(
-        { chatId },
-        { $push: { messages: message } },
-        { new: true, upsert: true }
-    );
+      console.log(`Received message: ${JSON.stringify(message)}`); // Log the received message
 
-    console.log(`Broadcasting message to chat ${chatId}`);
-    io.to(chatId).emit("message", message);
+      const chat = await Chat.findOneAndUpdate(
+          { chatId },
+          { $push: { messages: message } },
+          { new: true, upsert: true }
+      );
+
+      io.to(chatId).emit("message", message); // Broadcast to all clients in the room
+    } catch (error) {
+      console.error('Error sending message:', error);
+      socket.emit("error", { message: "Error sending message." });
+    }
   });
 });
 
