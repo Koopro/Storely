@@ -1,0 +1,51 @@
+<!-- Save this as postit.svg in your public or assets folder -->
+<svg id="Ebene_1" data-name="Ebene 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 330.24 330.24">
+    <defs>
+        <style>
+            .cls-1 {
+            filter: url(#drop-shadow-2);
+            }
+
+            .cls-1, .cls-2 {
+            fill: #edea87;
+            }
+
+            .cls-1, .cls-2, .cls-3 {
+            stroke-width: 0px;
+            }
+
+            .cls-2 {
+            filter: url(#drop-shadow-1);
+            }
+
+            .cls-3 {
+            fill: #9c9c5c;
+            filter: url(#drop-shadow-3);
+            }
+        </style>
+        <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+            <feOffset dx="7" dy="7"/>
+            <feGaussianBlur result="blur" stdDeviation="5"/>
+            <feFlood flood-color="#1d1d1b" flood-opacity=".14"/>
+            <feComposite in2="blur" operator="in"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+        <filter id="drop-shadow-2" filterUnits="userSpaceOnUse">
+            <feOffset dx="7" dy="7"/>
+            <feGaussianBlur result="blur-2" stdDeviation="5"/>
+            <feFlood flood-color="#1d1d1b" flood-opacity=".14"/>
+            <feComposite in2="blur-2" operator="in"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+        <filter id="drop-shadow-3" filterUnits="userSpaceOnUse">
+            <feOffset dx="7" dy="7"/>
+            <feGaussianBlur result="blur-3" stdDeviation="5"/>
+            <feFlood flood-color="#1d1d1b" flood-opacity=".14"/>
+            <feComposite in2="blur-3" operator="in"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+    </defs>
+    <polyline class="cls-2" points="308.12 47.12 308.12 308.12 8.12 308.12 8.12 8.12 262.67 8.12"/>
+    <path class="cls-1" d="M308.12,8.12"/>
+    <polyline class="cls-3" points="308.12 47.12 269.49 52.99 262.67 8.12"/>
+</svg>

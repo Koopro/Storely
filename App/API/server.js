@@ -4,21 +4,23 @@ const cors = require("cors");
 const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 const userProfileRoutes = require("./routes/UserProfile");
+const friendRoutes = require('./routes/friendRoutes');
+const todoRoutes = require('./routes/todoRoutes');
+const eventRoutes = require('./routes/eventRoutes');
+const chatRoutes = require('./routes/chatRoutes'); // Import the new chat routes
 const socketAuthMiddleware = require("./middleware/socketAuthMiddleware");
 const { dbConnectMongoose, dbConnectMongoClient } = require("./db");
 const { updateUserStatus } = require("./utils/userStatus");
-const friendRoutes = require('./routes/friendRoutes');
-const todoRoutes = require('./routes/todoRoutes');
 const morgan = require('morgan');
-const Chat = require('./models/Chat');
-const User = require('./models/User');
-const eventRoutes = require('./routes/eventRoutes');
+const multer = require('multer');
+const fs = require('fs');
+const Chat = require('./models/Chat'); // Import Chat model
+const User = require('./models/User'); // Import User model
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const server = require("http").createServer(app);
-
 const io = require('socket.io')(server, {
   cors: {
     origin: "http://localhost:8080",
@@ -46,12 +48,11 @@ app.use("/api", userProfileRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api", todoRoutes);
 app.use("/api", eventRoutes);
+app.use("/api", chatRoutes); // Use the new chat routes
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.static(path.join(__dirname, "public")));
 
-const multer = require('multer');
-const fs = require('fs');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const chatId = req.headers['chat-id'];
@@ -107,9 +108,12 @@ io.on("connection", (socket) => {
     try {
       let chat = await Chat.findOne({ chatId });
       if (!chat) {
+        console.log(`Chat not found with ID: ${chatId}, creating new chat.`);
         chat = new Chat({ chatId, messages: [] });
         await chat.save();
         console.log(`Chat created with ID: ${chatId}`);
+      } else {
+        console.log(`Chat found with ID: ${chatId}`);
       }
       socket.emit("loadOldMessages", chat.messages);
     } catch (error) {
