@@ -7,10 +7,10 @@
     <input v-model="newTodo.name" class="name" placeholder="Name" />
     <textarea v-model="newTodo.description" class="description" placeholder="Beschreibung"></textarea>
     <input v-model="newTodo.dueDate" class="date" type="date" />
-    <input v-model="newTodo.dueTime" 
-       class="time" 
-       type="time" 
-       :disabled="!newTodo.dueDate" 
+    <input v-model="newTodo.dueTime"
+       class="time"
+       type="time"
+       :disabled="!newTodo.dueDate"
        :class="{ 'disabled-class': !newTodo.dueDate }" />
 
     <label class="urgentfield">
@@ -126,7 +126,7 @@ export default {
             timeB.setHours(hourB, minuteB, 0, 0);
             return timeA - timeB;
           }
-          
+
           if (a.dueTime) return -1;
           if (b.dueTime) return 1;
         }
@@ -141,7 +141,7 @@ export default {
       return sortedTodos;
     }
   },
-  
+
   methods: {
     async fetchTodos() {
       try {
@@ -207,7 +207,7 @@ export default {
     },
     selectTodo(todo) {
       this.editIndex = this.todos.indexOf(todo);
-      this.editTodo = { 
+      this.editTodo = {
         ...todo,
         dueDate: this.formatDateForDisplay(todo.dueDate)
       };

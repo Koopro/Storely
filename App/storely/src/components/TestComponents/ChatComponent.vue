@@ -32,12 +32,12 @@
             @keyup.enter="sendMessage"
             placeholder="Type a message..."
             class="chat-input"
-            @input="scrollToBottom"
         />
-        <v-icon>
-          <button @click="sendMessage"><v-icon>mdi-send</v-icon></button>
-        </v-icon>
+        <button @click="sendMessage"><v-icon>mdi-send</v-icon></button>
       </div>
+    </div>
+    <div v-if="latestMessage">
+      <h1>{{ latestMessage.sender }}: {{ latestMessage.text }}</h1>
     </div>
   </div>
 </template>
@@ -56,6 +56,7 @@ export default {
     const authToken = `Bearer ${localStorage.getItem('authToken')}`;
     const socket = ref(null);
     const chatMessagesRef = ref(null);
+    const latestMessage = ref(null); // Ref to store the latest message
 
     const fetchFriends = async () => {
       try {
@@ -65,7 +66,6 @@ export default {
           },
         });
         friends.value = response.data;
-        console.log('Friends list fetched:', friends.value);
       } catch (error) {
         console.error('Error fetching friends:', error);
       }
@@ -79,16 +79,14 @@ export default {
           },
         });
         getUser.value = response.data;
-        console.log('User info fetched:', getUser.value);
       } catch (error) {
         console.error('Failed to fetch user info:', error);
       }
     };
 
     const selectUser = async (user) => {
-      console.log('User selected:', user);
-      selectedUser.value = reactive({ ...user, messages: [] });
-      console.log('Selected user after setting reactive:', selectedUser.value);
+      selectedUser.value = {...user, messages: []};
+      console.log('Selected user:', selectedUser.value); // Log selected user
       await fetchChatMessages();
       nextTick(scrollToBottom);
       joinChat();
@@ -101,7 +99,7 @@ export default {
         console.error('Chat ID is invalid.');
         return;
       }
-      console.log(`Fetching chat messages for chat ID: ${chatId}`);
+      console.log(`Fetching chat messages for chat ID: ${chatId}`); // Log chat ID
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/chats/${chatId}`, {
           headers: {
@@ -112,12 +110,12 @@ export default {
           sender: msg.userId === getUser.value._id ? 'You' : msg.username,
           text: msg.text,
         }));
-        console.log('Chat messages fetched:', selectedUser.value.messages);
+        console.log('Fetched messages:', selectedUser.value.messages); // Log fetched messages
         nextTick(scrollToBottom);
       } catch (error) {
         console.error('Error fetching chat messages:', error);
         if (error.response && error.response.status === 404) {
-          console.error('Chat not found, please check the chat ID:', chatId);
+          selectedUser.value.messages = [];
         }
       }
     };
@@ -131,15 +129,64 @@ export default {
         mediaUrl: null,
         mediaType: null,
       };
-      console.log('Sending message:', message);
+      console.log('Sending message:', message); // Log the message being sent
       socket.value.emit('sendMessage', message);
       selectedUser.value.messages.push({
         sender: 'You',
         text: newMessage.value,
       });
-      console.log('Message pushed locally:', selectedUser.value.messages);
       newMessage.value = '';
       nextTick(scrollToBottom);
+    };
+
+    const initializeSocket = () => {
+      const websocketUrl = process.env.VUE_APP_API_URL;
+      socket.value = io(websocketUrl, {
+        query: {
+          token: localStorage.getItem('authToken'),
+        },
+      });
+
+      socket.value.on('connect', () => {
+        console.log('Socket connected'); // Log socket connection
+
+        socket.value.on('loadOldMessages', (messages) => {
+          console.log('Loading old messages:', messages); // Log old messages
+          if (selectedUser.value) {
+            selectedUser.value.messages = messages.map((msg) => ({
+              sender: msg.userId === getUser.value._id ? 'You' : msg.username,
+              text: msg.text,
+            }));
+            nextTick(scrollToBottom);
+          }
+        });
+
+        socket.value.on('message', (message) => {
+          console.log('Received message:', message); // Log received message
+          const currentChatId = getChatId();
+          console.log('Current chat ID:', currentChatId); // Log current chat ID
+          console.log('Message chat ID:', message.chatId); // Log message chat ID
+          if (selectedUser.value && currentChatId === message.chatId) {
+            console.log('Adding message to selectedUser:', message); // Log message being added
+            selectedUser.value.messages.push({
+              sender: message.userId === getUser.value._id ? 'You' : message.username,
+              text: message.text,
+            });
+            latestMessage.value = {
+              sender: message.userId === getUser.value._id ? 'You' : message.username,
+              text: message.text,
+            }; // Update the latest message
+            console.log('Updated latest message:', latestMessage.value); // Log the latest message
+            nextTick(scrollToBottom);
+          } else {
+            console.log('Message received for a different chat or no selected user');
+          }
+        });
+      });
+
+      socket.value.on('disconnect', () => {
+        console.log('Socket disconnected');
+      });
     };
 
     const scrollToBottom = () => {
@@ -150,51 +197,10 @@ export default {
       });
     };
 
-    const setupSocket = () => {
-      const websocketUrl = `${process.env.VUE_APP_API_URL}`;
-      socket.value = io(websocketUrl, {
-        query: {
-          token: localStorage.getItem('authToken'),
-        },
-      });
-      console.log('Socket initialized:', socket.value);
-
-      socket.value.on('loadOldMessages', (messages) => {
-        console.log('Loaded old messages:', messages);
-        if (selectedUser.value) {
-          selectedUser.value.messages = messages.map((msg) => ({
-            sender: msg.userId === getUser.value._id ? 'You' : msg.username,
-            text: msg.text,
-          }));
-          console.log('Old messages set for selected user:', selectedUser.value.messages);
-          nextTick(scrollToBottom);
-        }
-      });
-
-      socket.value.on('message', (message) => {
-        console.log('Received message:', message);
-        const messageChatId = generateChatIdFromMessage(message);
-        const currentChatId = getChatId();
-        console.log(`Generated chat ID for comparison: ${currentChatId}`);
-        console.log('Message chat ID:', messageChatId);
-        if (selectedUser.value && currentChatId === messageChatId) {
-          selectedUser.value.messages.push({
-            sender: message.userId === getUser.value._id ? 'You' : message.username,
-            text: message.text,
-          });
-          console.log('Message pushed to selected user messages:', selectedUser.value.messages);
-          nextTick(scrollToBottom);
-        } else {
-          console.log('Message received for a different chat or no selected user');
-          console.log('Current selected user:', selectedUser.value);
-        }
-      });
-    };
-
     const joinChat = () => {
-      if (selectedUser.value) {
+      if (selectedUser.value && socket.value) {
         const chatId = getChatId();
-        console.log('Joining chat:', chatId);
+        console.log('Joining chat with ID:', chatId); // Log chat ID being joined
         socket.value.emit('joinChat', {
           chatId,
           userId: getUser.value._id,
@@ -208,78 +214,41 @@ export default {
       const recipientId = selectedUser.value.recipient._id;
       const userId = getUser.value._id;
 
-      console.log(`User ID: ${userId}`);
-      console.log(`Requester ID: ${requesterId}`);
-      console.log(`Recipient ID: ${recipientId}`);
-
       const otherUserId = requesterId === userId ? recipientId : requesterId;
       const userIds = [userId, otherUserId].sort();
-      const chatId = `${userIds[0]}-${userIds[1]}`;
-      console.log('Generated chat ID:', chatId);
-      return chatId;
-    };
-
-    const generateChatIdFromMessage = (message) => {
-      const userIds = [
-        message.userId,
-        getUser.value._id === message.userId ? selectedUser.value.recipient._id : getUser.value._id
-      ].sort();
-      const chatId = `${userIds[0]}-${userIds[1]}`;
-      return chatId;
-    };
-
-    const getFriendPfp = (friend) => {
-      if (!getUser.value) return null;
-      const friendProfile =
-          friend.requester._id === getUser.value._id ? friend.recipient : friend.requester;
-      return friendProfile.profileImageUrl
-          ? `${process.env.VUE_APP_API_URL}${friendProfile.profileImageUrl}`
-          : null;
+      return `${userIds[0]}-${userIds[1]}`;
     };
 
     const displayFriendName = (friend) => {
-      return (
-          getUser.value &&
-          (friend.requester._id === getUser.value._id ? friend.recipient.name : friend.requester.name)
-      );
+      if (!getUser.value) return '';
+      return friend.requester._id === getUser.value._id ? friend.recipient.name : friend.requester.name;
     };
 
     onMounted(async () => {
       await fetchFriends();
       await getUserInfo();
-      setupSocket();
+      initializeSocket();
     });
 
-    watch(selectedUser, (newVal, oldVal) => {
-      console.log('selectedUser updated:', newVal);
-      nextTick(scrollToBottom); // Ensure the chat scrolls to bottom when a new user is selected
+    watch(selectedUser, async (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        await fetchChatMessages();
+      }
     });
-
-    watch(
-        () => selectedUser.value?.messages,
-        (newVal, oldVal) => {
-          console.log('selectedUser.messages updated:', newVal);
-          nextTick(scrollToBottom);
-        },
-        { deep: true }
-    );
 
     return {
       selectedUser,
       newMessage,
       friends,
-      getUser,
+      chatMessagesRef,
+      latestMessage, // Include latest message in the return
       selectUser,
       sendMessage,
-      getFriendPfp,
       displayFriendName,
-      chatMessagesRef,
-      scrollToBottom,
     };
   },
 };
 </script>
-
 
 <style scoped>
 .no-friends {
@@ -288,38 +257,46 @@ export default {
   padding-left: 10px;
   border-right: 1px solid #ccc;
 }
+
 .users-container {
   width: auto;
   overflow-y: auto;
   max-width: 100px;
 }
+
 .chat-user {
   padding: 10px;
   cursor: pointer;
   border-bottom: 1px solid #ccc;
 }
+
 .chat-user:hover {
   background-color: #f0f0f0;
 }
+
 .active {
   background-color: #ddd;
 }
+
 .chat-content {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
+
 .chat-messages {
   overflow-y: auto;
   padding: 10px;
   border-left: 1px solid #ccc;
 }
+
 .message {
   display: flex;
   flex-direction: column;
   max-width: 70%;
   margin-bottom: 10px;
 }
+
 .my-message {
   margin-left: auto;
   align-self: flex-end;
@@ -340,65 +317,28 @@ export default {
   max-width: 80%;
   word-wrap: break-word;
 }
+
 .message-sender {
+  font-size: 12px;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
 }
+
 .message-text {
-  word-wrap: break-word;
+  font-size: 14px;
 }
-.no-user-selected {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-}
-.no-friends {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  height: 100%;
-}
-.chat-container {
-  display: flex;
-  border: 1px solid #ccc;
-  overflow: hidden;
-  height: 35rem;
-}
-.users-container {
-  width: 150px;
-  overflow-y: auto;
-}
-.chat-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.chat-messages {
-  height: 30rem;
-  overflow-y: auto;
-  padding: 10px;
-}
+
 .chat-input-container {
   display: flex;
-  align-items: center;
   padding: 10px;
-  border-top: 1px solid #ccc;
   border-left: 1px solid #ccc;
 }
+
 .chat-input {
   flex: 1;
   padding: 10px;
-  border: none;
-  outline: none;
-}
-@media (max-width: 450px) {
-  .no-friends {
-    max-width: 100px;
-  }
-  .chat-input-container {
-    flex-direction: column;
-  }
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
 }
 </style>
