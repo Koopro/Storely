@@ -10,13 +10,13 @@
         <!-- Left Column for Todo and Calendar Cards stacked -->
         <v-col cols="12" md="7">
           <!-- Todo Card -->
+
           <v-card class="todo-card">
             <a href="/todo" class="link">
             <v-card-title class="text-h5">To-Do</v-card-title>
-            </a>
             <v-card-text>
-              <!-- Todo content here -->
-            </v-card-text>
+              <p>Hier Klicken um auf die ToDo zu gelangen.</p>
+            </v-card-text></a>
           </v-card>
           <!-- Calendar Card -->
           <v-card class="calendar-card">
