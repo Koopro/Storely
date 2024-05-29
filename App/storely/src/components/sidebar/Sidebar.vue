@@ -16,7 +16,7 @@
             <v-icon :class="'mdi mdi-format-list-checks' + (darkMode ? ' dark-icon' : '')"></v-icon>
             <span class="link-name" v-show="isExpanded">ToDo</span>
           </router-link>
-          <router-link to="/testing7" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
+          <router-link to="/chat" class="sidebar-link" :style="{ color: darkMode ? '#fff' : '#000' }">
             <v-icon :class="'mdi mdi-forum-outline' + (darkMode ? ' dark-icon' : '')"></v-icon>
             <span class="link-name" v-show="isExpanded">Chat</span>
           </router-link>

@@ -9,7 +9,7 @@ import Calendar from '../views/Calendar.vue';
 import TestView2 from '../views/TestView2.vue';
 import TestView3 from '../views/TestView3.vue';
 import TestView4 from '../views/TestView4.vue';
-import TestView7 from '../views/TestView7.vue';
+import ChatView from '../views/ChatView.vue';
 import TestView8 from '../views/TestView8.vue';
 import AdminView from '../views/AdminView.vue';
 import NotesView from '../views/NotesView.vue';
@@ -71,9 +71,9 @@ const routes = [
     component: Calendar,
   },
   {
-  path: '/testing7',
-    name: 'testing7',
-    component: TestView7,
+  path: '/chat',
+    name: 'chat',
+    component: ChatView,
   },
   {
     path: '/admin',

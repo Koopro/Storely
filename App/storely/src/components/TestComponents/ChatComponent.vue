@@ -1,50 +1,66 @@
 <template>
-  <div class="chat-container">
-    <div v-if="friends.length === 0" class="no-friends">
-      <p>You don't have any friends yet. Please add friends in your profile.</p>
-    </div>
-    <div v-else class="users-container">
-      <div
-          v-for="(friend, index) in friends"
-          :key="index"
-          class="chat-user"
-          :class="{ active: friend === selectedUser }"
-          @click="selectUser(friend)"
-      >
-        {{ displayFriendName(friend) }}
-      </div>
-    </div>
-    <div class="chat-content">
-      <div v-if="selectedUser" class="chat-messages" ref="chatMessages">
-        <div
-            v-for="(message, index) in selectedUser.messages"
-            :key="index"
-            :class="['message', { 'my-message': message.sender === 'You', 'other-message': message.sender !== 'You' }]"
-        >
-          <div class="message-sender">{{ message.sender === 'You' ? 'You' : message.sender }}</div>
-          <div class="message-text">{{ message.text }}</div>
-        </div>
-      </div>
-      <div v-else class="no-user-selected">Please select a user to chat.</div>
-      <div v-if="selectedUser" class="chat-input-container">
-        <input
-            v-model="newMessage"
-            @keyup.enter="sendMessage"
-            placeholder="Type a message..."
-            class="chat-input"
-        />
-        <button @click="sendMessage"><v-icon>mdi-send</v-icon></button>
-      </div>
-    </div>
-    <div v-if="latestMessage">
-      <h1>{{ latestMessage.sender }}: {{ latestMessage.text }}</h1>
-    </div>
-  </div>
+  <v-container fluid>
+    <v-row>
+      <v-col cols="3">
+        <v-card>
+          <v-card-title class="subtitle-1">Users</v-card-title>
+          <v-divider></v-divider>
+          <v-list dense>
+            <v-list-item
+                v-for="(friend, index) in friends"
+                :key="index"
+                @click="selectUser(friend)"
+                :class="{ active: friend === selectedUser }"
+            >
+              <v-list-item-content>
+                <v-list-item-title class="subtitle-2">{{ displayFriendName(friend) }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-col>
+      <v-col cols="9">
+        <v-card>
+          <v-card-title class="subtitle-1" v-if="!selectedUser">Please select a user to chat.</v-card-title>
+          <v-card-title class="subtitle-1" v-else>{{ displayFriendName(selectedUser) }}</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <div v-if="selectedUser" class="chat-messages" ref="chatMessages">
+              <div
+                  v-for="(message, index) in selectedUser.messages"
+                  :key="index"
+                  :class="['message', { 'my-message': message.sender === 'You', 'other-message': message.sender !== 'You' }]"
+              >
+                <div class="message-sender subtitle-2">{{ message.sender === 'You' ? 'You' : message.sender }}</div>
+                <div class="message-text body-2">{{ message.text }}</div>
+              </div>
+            </div>
+          </v-card-text>
+          <v-card-actions v-if="selectedUser">
+            <v-text-field
+                v-model="newMessage"
+                @keyup.enter="sendMessage"
+                placeholder="Type a message..."
+                outlined
+                dense
+                class="chat-input"
+            ></v-text-field>
+            <v-btn @click="sendMessage" icon>
+              <v-icon>mdi-send</v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-snackbar v-model="latestMessage" top right>
+      <span>{{ latestMessage.sender }}: {{ latestMessage.text }}</span>
+    </v-snackbar>
+  </v-container>
 </template>
 
 <script>
 import axios from 'axios';
-import { ref, reactive, onMounted, nextTick, watch } from 'vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
 import io from 'socket.io-client';
 
 export default {
@@ -251,43 +267,14 @@ export default {
 </script>
 
 <style scoped>
-.no-friends {
-  width: auto;
-  max-width: 250px;
-  padding-left: 10px;
-  border-right: 1px solid #ccc;
-}
-
-.users-container {
-  width: auto;
-  overflow-y: auto;
-  max-width: 100px;
-}
-
-.chat-user {
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #ccc;
-}
-
-.chat-user:hover {
-  background-color: #f0f0f0;
-}
-
-.active {
-  background-color: #ddd;
-}
-
-.chat-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.v-card {
+  margin-bottom: 16px;
 }
 
 .chat-messages {
+  height: 400px;
   overflow-y: auto;
   padding: 10px;
-  border-left: 1px solid #ccc;
 }
 
 .message {
@@ -328,17 +315,25 @@ export default {
   font-size: 14px;
 }
 
-.chat-input-container {
-  display: flex;
-  padding: 10px;
-  border-left: 1px solid #ccc;
-}
-
 .chat-input {
   flex: 1;
   padding: 10px;
-  border: 1px solid #ccc;
   border-radius: 5px;
-  margin-right: 10px;
+}
+
+.active {
+  background-color: #ddd;
+}
+
+.subtitle-1 {
+  font-size: 16px;
+}
+
+.subtitle-2 {
+  font-size: 14px;
+}
+
+.body-2 {
+  font-size: 12px;
 }
 </style>
